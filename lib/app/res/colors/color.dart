@@ -15,17 +15,6 @@ class AppColor {
   static const Color darkGray3 = Color(0xFF625D5D); // #625D5D – muted dark gray, neutral tone
 
 
-
-
-
-
-
-
-
-
-
-
-
   // #EBEBEB
   static const Color customDodgerBlue = Color(0xFF1E90FF);// #1E90FF
   static const Color blueDeep     = Color(0xFF1966B1); // #1966B1

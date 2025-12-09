@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/modules/auth/views/forgotpass.dart';
+import 'package:Nuweli/app/modules/auth/views/forgotpass.dart';
 
-import 'package:mompr_em/app/modules/auth/views/signup.dart';
-import 'package:mompr_em/app/modules/home/views/navbar.dart';
+import 'package:Nuweli/app/modules/auth/views/signup.dart';
+import 'package:Nuweli/app/modules/home/views/navbar.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
@@ -29,8 +29,8 @@ class Login extends StatelessWidget {
 
         title: SvgPicture.asset(
           'assets/icons/svg1.svg',
-          height: 35.h,
-          width: 35.w,
+          height: 20.h,
+          width: 20.w,
         ),
         centerTitle: true,
       ),
@@ -71,7 +71,7 @@ class Login extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               InputTextWidget(
-
+controller: controller.emailController,
                 hintText: 'Email',
                 onChanged: (value) {},
                 leading: true,
@@ -95,7 +95,7 @@ class Login extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               InputTextWidget(
-
+controller: controller.passwordController,
                 hintText: 'Enter your password',
                 onChanged: (value) {},
                 obscureText: true,
@@ -163,22 +163,21 @@ class Login extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 20.h),
-              CustomButton(
-                onPress: () async {
-                  Get.offAll(Navbar(),transition: Transition.rightToLeft);
-                },
-                title: 'Log in',
-                textColor: Colors.black,
-                gradient: LinearGradient(
-                  colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                width: double.infinity,
-                height: 30.h,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-              ),
+      Obx(()=>        CustomButton(
+        onPress: controller.login,
+        loading: controller.isLoading.value,
+        title: 'Log in',
+        textColor: Colors.black,
+        gradient: LinearGradient(
+          colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        width: double.infinity,
+        height: 30.h,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w600,
+      ),),
               SizedBox(height: 20.h),
               Row(
                 children: [
@@ -212,23 +211,28 @@ class Login extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(1.5.w),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(9.r),
-                      ),
+                    child: GestureDetector(
+                      onTap: ()async{
+                        await controller.signInWithGoogle();
+                      },
                       child: Container(
-                        padding: EdgeInsets.all(15.w),
+                        padding: EdgeInsets.all(1.5.w),
                         decoration: BoxDecoration(
-                          color: AppColor.customDarkGray2,
-                          borderRadius: BorderRadius.circular(7.r),
+                          gradient: LinearGradient(
+                            colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(9.r),
                         ),
-                        child: SvgPicture.asset(ImageAssets.svg15),
+                        child: Container(
+                          padding: EdgeInsets.all(15.w),
+                          decoration: BoxDecoration(
+                            color: AppColor.customDarkGray2,
+                            borderRadius: BorderRadius.circular(7.r),
+                          ),
+                          child: SvgPicture.asset(ImageAssets.svg15),
+                        ),
                       ),
                     ),
                   ),

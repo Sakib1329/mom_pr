@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/res/colors/color.dart';
+import 'package:Nuweli/app/res/colors/color.dart';
+import 'package:Nuweli/app/res/assets/imageassets.dart';
 
 class NetflixStyleCard extends StatelessWidget {
   final String imageUrl;
@@ -19,10 +20,9 @@ class NetflixStyleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.all(10.w),
+      padding: EdgeInsets.all(10.w),
       child: Container(
-
-        padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 4.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
         decoration: BoxDecoration(
           color: AppColor.darkGray2,
           boxShadow: [
@@ -35,19 +35,16 @@ class NetflixStyleCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-
             Container(
               width: 150.w,
               height: 70.h,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(imageUrl),
+                  image: _buildImageProvider(imageUrl),
                   fit: BoxFit.cover,
                 ),
               ),
             ),
-
-            // Content container
             Expanded(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -55,7 +52,6 @@ class NetflixStyleCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // "New Arrival" text
                     Text(
                       'New Arrival',
                       style: TextStyle(
@@ -65,7 +61,6 @@ class NetflixStyleCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    // Title
                     Text(
                       title,
                       style: TextStyle(
@@ -77,7 +72,6 @@ class NetflixStyleCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 4.h),
-                    // Time/Date
                     Text(
                       time,
                       style: TextStyle(
@@ -94,5 +88,14 @@ class NetflixStyleCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  ImageProvider _buildImageProvider(String url) {
+
+    if (url.startsWith('http')) {
+
+      return NetworkImage(url);
+    }
+    return AssetImage(url);
   }
 }

@@ -1,127 +1,210 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:mompr_em/app/res/assets/imageassets.dart';
+import 'package:get/get.dart';
 
-import '../../../res/fonts/fonts.dart';
+import 'package:Nuweli/app/res/fonts/fonts.dart';
+import '../../home/controllers/home_controller.dart';
+import '../../home/models/movie_model.dart';
+
+import '../../home/models/series_model.dart';
 
 class Mylist extends StatelessWidget {
   const Mylist({Key? key}) : super(key: key);
 
-  // Sample movie data
-  final List<Map<String, String>> movies = const [
-    {'image': ImageAssets.img_6},
-    {'image': ImageAssets.img_7},
-    {'image': ImageAssets.img_8},
-    {'image': ImageAssets.img_9},
-    {'image': ImageAssets.img_10},
-    {'image': ImageAssets.img_11},
-    {'image': ImageAssets.img_12},
-    {'image': ImageAssets.img_13},
-    {'image': ImageAssets.img_14},
-    {'image': ImageAssets.img_6},
-    {'image': ImageAssets.img_7},
-    {'image': ImageAssets.img_8},
-    {'image': ImageAssets.img_9},
-    {'image': ImageAssets.img_10},
-    {'image': ImageAssets.img_11},
-    {'image': ImageAssets.img_12},
-    {'image': ImageAssets.img_13},
-    {'image': ImageAssets.img_14},
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final HomeController homeController = Get.find<HomeController>();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
           onPressed: () => Navigator.pop(context),
         ),
-        title: SvgPicture.asset('assets/icons/svg1.svg', height: 30.h),
+        title: SvgPicture.asset('assets/icons/svg1.svg', height: 20.h),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w,vertical: 10.h), // reduced padding
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'My List',
-                style: AppTextStyles.montserratSemiBold.copyWith(
-                  color: Colors.white,
-                  fontSize: 18.sp,
+      body: Obx(() {
+        if (homeController.isWatchLaterLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (homeController.watchLaterErrorMessage.isNotEmpty) {
+          return Center(
+            child: Text(
+              homeController.watchLaterErrorMessage.value,
+              style: TextStyle(color: Colors.white, fontSize: 16.sp),
+            ),
+          );
+        }
+        if (homeController.watchLaterItems.isEmpty) {
+          return Center(
+            child: Text(
+              'No items in your watch later list',
+              style: TextStyle(color: Colors.white, fontSize: 16.sp),
+            ),
+          );
+        }
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'My List',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                SizedBox(height: 10.h),
+                GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10.w,
+                    mainAxisSpacing: 14.h,
+                    childAspectRatio: 0.58,
+                  ),
+                  itemCount: homeController.watchLaterItems.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final item = homeController.watchLaterItems[index];
+                    String imageUrl = '';
+                    String title = '';
+                    String aliasType = '';
 
-              ),
-              SizedBox(height: 10.h,),
-              GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // keep 3 per row
-                  crossAxisSpacing: 10.w, // slightly less spacing
-                  mainAxisSpacing: 14.h,
-                  childAspectRatio: 0.58, // was 0.65 → makes them ~10% taller/wider
-                ),
-                itemCount: movies.length,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final movie = movies[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.r), // slightly bigger radius
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 6.r, // little bigger shadow
-                          offset: Offset(0, 3.h),
+                    if (item is Movie) {
+                      imageUrl = item.postersUrl.isNotEmpty
+                          ? item.postersUrl.first
+                          : '';
+                      title = item.title;
+                      aliasType = 'movie';
+                    } else if (item is Series) {
+                      imageUrl = item.postersUrl.isNotEmpty
+                          ? item.postersUrl.first
+                          : '';
+                      title = item.name;
+                      aliasType = 'series';
+                    }
+
+                    return GestureDetector(
+                      onTap: () async {
+                        if (aliasType.isNotEmpty) {
+                          await homeController.fetchMovieDetails(item.id, aliasType);
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 6.r,
+                              offset: Offset(0, 3.h),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.asset(
-                            movie['image']!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.r),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              imageUrl.isNotEmpty
+                                  ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[800],
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey[400],
+                                      size: 42.sp,
+                                    ),
+                                  );
+                                },
+                              )
+                                  : Container(
                                 color: Colors.grey[800],
                                 child: Icon(
                                   Icons.image_not_supported,
                                   color: Colors.grey[400],
-                                  size: 42.sp, // slightly bigger
+                                  size: 42.sp,
                                 ),
-                              );
-                            },
-                          ),
-                          // Gradient overlay
-                          Container(
-                            height: 65.h, // a bit taller overlay
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.8),
-                                ],
                               ),
-                            ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: 65.h,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withOpacity(0.8),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w,
+                                        vertical: 10.h,
+                                      ),
+                                      child: Text(
+                                        title,
+                                        style: AppTextStyles.montserratMedium.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 12.sp,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 8.h,
+                                right: 8.w,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                      await homeController.removeFromWatchLater(item.id, aliasType);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(4.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                      size: 20.sp,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

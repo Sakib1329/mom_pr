@@ -48,6 +48,8 @@ class ImageAssets {
   static const String svg28 = 'assets/icons/svg28.svg';
   static const String svg29= 'assets/icons/svg29.svg';
   static const String svg30= 'assets/icons/svg30.svg';
+  static const String svg31= 'assets/icons/svg31.svg';
+  static const String svg32= 'assets/icons/svg32.svg';
 
   static const String img = 'assets/images/img_1.png';
 

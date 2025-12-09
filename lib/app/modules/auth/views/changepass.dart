@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/modules/auth/views/otp.dart';
-import 'package:mompr_em/app/modules/auth/views/verifiedpage.dart';
+import 'package:Nuweli/app/modules/auth/views/otp.dart';
+import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
@@ -21,7 +21,7 @@ class Changepass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.fromPage.value = "forgot_password";
+    controller.frompage.value = "forgot_password";
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -66,7 +66,7 @@ class Changepass extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-
+controller: controller.passwordController,
               hintText: 'Enter your new password',
               onChanged: (value) {},
               obscureText: true,
@@ -90,7 +90,7 @@ class Changepass extends StatelessWidget {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-
+controller: controller.confirmpasswordController,
               hintText: 'Confirm  new password',
               onChanged: (value) {},
               obscureText: true,
@@ -102,22 +102,21 @@ class Changepass extends StatelessWidget {
               height: 40.0,
             ),
             SizedBox(height: 32.h), // Reduced from 40.h to 32.h
-            CustomButton(
-              onPress: () async {
-                Get.offAll(Verifiedpage(page: "forgot_password",),transition: Transition.rightToLeft);
-              },
-              title: 'Reset Password',
-              textColor: Colors.black,
-              gradient: LinearGradient(
-                colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              width: double.infinity,
-              height: 30.h,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
+         Obx(()=>   CustomButton(
+           onPress: () => controller.setNewPassword(),
+           title: 'Reset Password',
+           textColor: Colors.black,
+           loading:  controller.isLoadingnewpass.value,
+           gradient: LinearGradient(
+             colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+             begin: Alignment.topLeft,
+             end: Alignment.bottomRight,
+           ),
+           width: double.infinity,
+           height: 30.h,
+           fontSize: 14.sp,
+           fontWeight: FontWeight.w600,
+         ),),
             Spacer(),
 
           ],

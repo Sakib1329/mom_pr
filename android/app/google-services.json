@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "949412769929",
+    "project_id": "mompr-48645",
+    "storage_bucket": "mompr-48645.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:949412769929:android:4208fe3a203dff2fa0d658",
+        "android_client_info": {
+          "package_name": "com.magicverse.mompr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "949412769929-6dhp15ph46fou161pjulcg76gfj91ah1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.magicverse.mompr",
+            "certificate_hash": "551b5dfb6bf437edbd5c7c6353fa556516532213"
+          }
+        },
+        {
+          "client_id": "949412769929-l38gmg6ig130cv01vqc15qq8r3jg5uqe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.magicverse.mompr",
+            "certificate_hash": "df6681fa50c7112424ed14d92cba6bb3460b6d44"
+          }
+        },
+        {
+          "client_id": "949412769929-568vbl4af30o4sb2rm4cm8v84l9smca4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZQkHpo2AhG6B2S6du_eloo-icB28d3lM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "949412769929-568vbl4af30o4sb2rm4cm8v84l9smca4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

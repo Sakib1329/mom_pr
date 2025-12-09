@@ -4,58 +4,74 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:mompr_em/app/modules/auth/controllers/authcontroller.dart';
-import 'package:mompr_em/app/modules/auth/views/login.dart';
-import 'package:mompr_em/app/modules/auth/views/verifiedpage.dart';
-import 'package:mompr_em/app/res/colors/color.dart';
-import 'package:mompr_em/app/res/fonts/fonts.dart';
+import 'package:Nuweli/app/modules/auth/controllers/authcontroller.dart';
+import 'package:Nuweli/app/modules/auth/views/login.dart';
+import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
+import 'package:Nuweli/app/modules/settings/controllers/settingcontroller.dart';
+import 'package:Nuweli/app/modules/settings/views/termsandcondition.dart';
+import 'package:Nuweli/app/res/colors/color.dart';
+import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../../../res/assets/imageassets.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/input_text_widget.dart';
 import 'otp.dart';
 
-class Signup extends StatefulWidget {
+class Signup extends StatelessWidget {
   Signup({super.key});
 
-  @override
-  State<Signup> createState() => _CreateAccountPageState();
-}
+  final Authcontroller controller = Get.find<Authcontroller>();
+  final Settingcontroller settingcontroller=   Get.put(Settingcontroller());
 
-class _CreateAccountPageState extends State<Signup> {
-  final Authcontroller controller = Get.find();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-  final TextEditingController _countryController = TextEditingController();
-
-  bool _agreeToTerms = false;
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _countryController.dispose();
-    super.dispose();
+  void _showCountryPicker(BuildContext context) {
+    showCountryPicker(
+      context: context,
+      showPhoneCode: false,
+      onSelect: (Country country) {
+        controller.countryController.text = country.name;
+      },
+      countryListTheme: CountryListThemeData(
+        backgroundColor: AppColor.darkCharcoal,
+        flagSize: 25.w,
+        bottomSheetHeight: 500.h,
+        textStyle: AppTextStyles.montserratRegular.copyWith(
+          color: Colors.white,
+          fontSize: 12.sp,
+        ),
+        searchTextStyle: AppTextStyles.montserratRegular.copyWith(
+          color: Colors.white,
+          fontSize: 12.sp,
+        ),
+        inputDecoration: InputDecoration(
+          labelText: 'Search',
+          labelStyle: AppTextStyles.montserratRegular.copyWith(color: Colors.white70),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: AppColor.vividAmber),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          hintText: 'Search country',
+          hintStyle: AppTextStyles.montserratRegular.copyWith(color: Colors.white54),
+          fillColor: Colors.grey[800],
+          filled: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    controller.fromPage.value = "signup";
+    controller.frompage.value = "signup";
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-
         title: SvgPicture.asset(
           'assets/icons/svg1.svg',
-          height: 35.h,
-          width: 35.w,
+          height: 20.h,
+          width: 20.w,
         ),
         centerTitle: true,
       ),
@@ -85,7 +101,6 @@ class _CreateAccountPageState extends State<Signup> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20.h),
-
             // First & Last Name
             Row(
               children: [
@@ -102,7 +117,7 @@ class _CreateAccountPageState extends State<Signup> {
                       ),
                       SizedBox(height: 6.h),
                       InputTextWidget(
-                        controller: _firstNameController,
+                        controller: controller.firstnamecontroller,
                         hintText: 'First name',
                         onChanged: (value) {},
                         backgroundColor: AppColor.customDarkGray2,
@@ -129,7 +144,7 @@ class _CreateAccountPageState extends State<Signup> {
                       ),
                       SizedBox(height: 6.h),
                       InputTextWidget(
-                        controller: _lastNameController,
+                        controller: controller.lastnamecontroller,
                         hintText: 'Last name',
                         onChanged: (value) {},
                         backgroundColor: AppColor.customDarkGray2,
@@ -145,7 +160,6 @@ class _CreateAccountPageState extends State<Signup> {
               ],
             ),
             SizedBox(height: 14.h),
-
             // Email
             Text(
               'Email',
@@ -156,7 +170,7 @@ class _CreateAccountPageState extends State<Signup> {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-              controller: _emailController,
+              controller: controller.emailController,
               hintText: 'Email',
               onChanged: (value) {},
               leading: true,
@@ -169,7 +183,6 @@ class _CreateAccountPageState extends State<Signup> {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
-
             // Password
             Text(
               'Password',
@@ -180,7 +193,7 @@ class _CreateAccountPageState extends State<Signup> {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-              controller: _passwordController,
+              controller: controller.passwordController,
               hintText: 'Enter your password',
               onChanged: (value) {},
               obscureText: true,
@@ -193,7 +206,6 @@ class _CreateAccountPageState extends State<Signup> {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
-
             // Confirm Password
             Text(
               'Confirm password',
@@ -204,7 +216,7 @@ class _CreateAccountPageState extends State<Signup> {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-              controller: _confirmPasswordController,
+              controller: controller.confirmpasswordController,
               hintText: 'Confirm password',
               onChanged: (value) {},
               obscureText: true,
@@ -216,7 +228,6 @@ class _CreateAccountPageState extends State<Signup> {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
-
             // Country
             Text(
               'Country',
@@ -227,11 +238,11 @@ class _CreateAccountPageState extends State<Signup> {
             ),
             SizedBox(height: 6.h),
             InputTextWidget(
-              controller: _countryController,
+              controller: controller.countryController,
               hintText: 'Select Country',
               onChanged: (value) {},
               readOnly: true,
-              onTap: () => _showCountryPicker(),
+              onTap: () => _showCountryPicker(context),
               backimageadd: true,
               backimage: ImageAssets.svg14,
               backgroundColor: AppColor.customDarkGray2,
@@ -242,20 +253,17 @@ class _CreateAccountPageState extends State<Signup> {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
-
             // Terms & Conditions
-            Row(
+            Obx(() => Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
                   width: 18.w,
                   height: 18.h,
                   child: Checkbox(
-                    value: _agreeToTerms,
+                    value: controller.ischecked.value,
                     onChanged: (value) {
-                      setState(() {
-                        _agreeToTerms = value ?? false;
-                      });
+                      controller.ischecked.value = value ?? false;
                     },
                     fillColor: MaterialStateProperty.resolveWith((states) {
                       if (states.contains(MaterialState.selected)) {
@@ -284,54 +292,53 @@ class _CreateAccountPageState extends State<Signup> {
                           style: AppTextStyles.montserratMedium.copyWith(
                             color: const Color(0xFFFFD700),
                             fontSize: 12.sp,
+                            decoration: TextDecoration.underline
                           ),
+                          recognizer: TapGestureRecognizer()..onTap =()async{
+                            await settingcontroller.loadPrivacyPolicy();
+                            Get.to(Privacypolicy(),transition: Transition.rightToLeft);
+                          }
                         ),
                       ],
                     ),
                   ),
                 ),
               ],
-            ),
+            )),
             SizedBox(height: 20.h),
-
             // Create Account Button
-            CustomButton(
-              onPress: () async {
-                if (_agreeToTerms) {
-                  print('Creating account...');
-                  Get.to(
-                    Otpverifications(
-                      email: _emailController.text.trim(),
-                      fromPage: "signup",
-                    ),
-                    transition: Transition.rightToLeftWithFade,
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Please agree to Terms & conditions',
-                        style: TextStyle(color: AppColor.background),
-                      ),
-                      backgroundColor: AppColor.vividAmber,
-                    ),
-                  );
-                }
-              },
-              title: 'Create account',
-              textColor: Colors.black,
-              gradient: LinearGradient(
-                colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              width: double.infinity,
-              height: 30.h,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            SizedBox(height: 14.h),
+           Obx(()=> CustomButton(
+             onPress: () async {
+               if (controller.ischecked.value) {
+                 print('Creating account...');
+                 await controller.register();
 
+               } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   SnackBar(
+                     content: Text(
+                       'Please agree to Terms & conditions',
+                       style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
+                     ),
+                     backgroundColor: AppColor.vividAmber,
+                   ),
+                 );
+               }
+             },
+             title: 'Create account',
+             loading: controller.isLoadingsignup.value,
+             textColor: Colors.black,
+             gradient: LinearGradient(
+               colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+               begin: Alignment.topLeft,
+               end: Alignment.bottomRight,
+             ),
+             width: double.infinity,
+             height: 30.h,
+             fontSize: 14.sp,
+             fontWeight: FontWeight.w600,
+           ),),
+            SizedBox(height: 14.h),
             // OR Divider
             Row(
               children: [
@@ -350,7 +357,6 @@ class _CreateAccountPageState extends State<Signup> {
               ],
             ),
             SizedBox(height: 14.h),
-
             // Social Login
             Row(
               children: [
@@ -389,7 +395,6 @@ class _CreateAccountPageState extends State<Signup> {
               ],
             ),
             SizedBox(height: 18.h),
-
             // Already have account
             Center(
               child: RichText(
@@ -403,12 +408,6 @@ class _CreateAccountPageState extends State<Signup> {
                       ),
                     ),
                     TextSpan(
-                      onEnter: (event) {
-                        Get.to(
-                          Login(),
-                          transition: Transition.rightToLeftWithFade,
-                        );
-                      },
                       text: 'Log in',
                       style: AppTextStyles.montserratMedium.copyWith(
                         color: AppColor.sunnyYellow,
@@ -418,7 +417,7 @@ class _CreateAccountPageState extends State<Signup> {
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
                           Get.to(
-                            () => Login(),
+                                () => Login(),
                             transition: Transition.rightToLeftWithFade,
                           );
                         },
@@ -433,52 +432,4 @@ class _CreateAccountPageState extends State<Signup> {
       ),
     );
   }
-
-  // Replace your current _showCountryPicker method with this:
-  void _showCountryPicker() {
-    showCountryPicker(
-      context: context,
-      showPhoneCode: false,
-      onSelect: (Country country) {
-        setState(() {
-          _countryController.text = country.name;
-        });
-      },
-      countryListTheme: CountryListThemeData(
-        backgroundColor: AppColor.darkCharcoal,
-        flagSize: 25.w,
-        bottomSheetHeight: 500.h,
-        textStyle: AppTextStyles.montserratRegular.copyWith(
-          color: Colors.white, // color of country list text
-          fontSize: 12.sp,
-        ),
-        searchTextStyle: AppTextStyles.montserratRegular.copyWith(
-          color: Colors.white, // <-- user typed text color
-          fontSize: 12.sp,
-        ),
-
-        inputDecoration: InputDecoration(
-
-          labelText: 'Search',
-          labelStyle: AppTextStyles.montserratRegular.copyWith(color: Colors.white70),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: AppColor.vividAmber),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          hintText: 'Search country',
-          hintStyle: AppTextStyles.montserratRegular.copyWith(color: Colors.white54),
-          fillColor: Colors.grey[800],
-          filled: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        ),
-        
-      ),
-
-    );
-  }
-
 }

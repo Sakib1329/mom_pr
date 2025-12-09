@@ -3,54 +3,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:mompr_em/app/modules/home/controllers/home_controller.dart';
-import 'package:mompr_em/app/modules/home/controllers/navcontroller.dart';
-import 'package:mompr_em/app/modules/home/views/category_home.dart';
-import 'package:mompr_em/app/modules/home/views/comedies.dart';
-import 'package:mompr_em/app/modules/home/views/drama.dart';
-import 'package:mompr_em/app/modules/home/views/liveshow.dart';
-import 'package:mompr_em/app/modules/home/views/movie.dart';
-import 'package:mompr_em/app/modules/home/views/music_video.dart';
-import 'package:mompr_em/app/modules/settings/views/mylist.dart';
-import 'package:mompr_em/app/modules/settings/views/profile.dart';
-import 'package:mompr_em/app/modules/settings/views/subscribtion.dart';
+import 'package:Nuweli/app/modules/home/controllers/home_controller.dart';
+import 'package:Nuweli/app/modules/home/controllers/navcontroller.dart';
+import 'package:Nuweli/app/modules/home/views/category_home.dart';
+import 'package:Nuweli/app/modules/home/views/comedies.dart';
+
+import 'package:Nuweli/app/modules/home/views/liveshow.dart';
+import 'package:Nuweli/app/modules/home/views/movie.dart';
+import 'package:Nuweli/app/modules/home/views/music_video.dart';
+import 'package:Nuweli/app/modules/home/views/series.dart';
+import 'package:Nuweli/app/modules/settings/views/mylist.dart';
+import 'package:Nuweli/app/modules/settings/views/profile.dart';
+import 'package:Nuweli/app/modules/settings/views/subscribtion.dart';
+import 'package:Nuweli/app/modules/settings/views/watch_history.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
 import '../../../res/fonts/fonts.dart';
-import '../widgets/popupwidget.dart';
+
+import '../../settings/controllers/settingcontroller.dart';
 import '../widgets/subscribe_drawer.dart';
+import 'collections.dart';
 
 class HomePage extends StatelessWidget {
   final HomeController controller = Get.find();
   final NavController navController = Get.find();
+  final Settingcontroller settingcontroller  = Get.find();
 
   HomePage({super.key});
 
   final _pages = <Widget>[
     CategoryHome(),
-    Movie(),
-    Drama(),
+    Moviepage(),
+    Seriespage(),
     MusicVideo(),
-    Liveshow(),
-    Comedies(),
+
   ];
 
   final _titles = [
     'Home',
     'Movie',
     'Series',
-    'Music Video',
-    'Tv Shows',
-    'Comedies',
+    'Documentary',
+
   ];
   final _icons = [
     ImageAssets.svg12,
     ImageAssets.svg8,
     ImageAssets.svg9,
     ImageAssets.svg10,
-    ImageAssets.svg11,
-    ImageAssets.svg7,
+
   ];
 
   @override
@@ -78,12 +80,18 @@ class HomePage extends StatelessWidget {
                           children: [
                             SvgPicture.asset(
                               'assets/icons/svg1.svg',
-                              height: 30.h,
+                              height: 15.h,
                             ),
                             Row(
                               children: [
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+
+                                    navController.currentIndex.value++;
+                                  },
+
+
+
                                   icon: Icon(
                                     CupertinoIcons.search,
                                     color: Colors.white,
@@ -129,26 +137,25 @@ class HomePage extends StatelessWidget {
 
                                         ),
                                   onTap: (){
-                                          Get.to(Subscribtion(),transition: Transition.rightToLeft);
+                                          Get.to(Subscription(),transition: Transition.rightToLeft);
                                   },
                                       )
                                     : ProfileDropdown(
-                                  userName: "Awad Arman",
-                                  userImageUrl: ImageAssets.person,
+                                  userName: settingcontroller.firstName.value.isNotEmpty
+                                  ?"${settingcontroller.firstName.value} ${settingcontroller.lastName.value} "
+                                  :"User",
+                                  userImageUrl: settingcontroller.profileImage.value,
                                   onProfileTap: () => Get.to(ProfilePage(),transition: Transition.rightToLeft),
                                   onMyListTap: () =>  Get.to(Mylist(),transition: Transition.rightToLeft),
-                                  onWatchHistoryTap: () => print("Watch History tapped"),
-                                  onUnsubscribeTap: (){
-                                    showDeleteConfirmationPopup(
-                                      context: context,
-                                      buttontext: "Unsubscribe",
-                                      title: 'Unsubscribe?',
-                                      subtitle: 'Are you sure want to Unsubscribe?',
-                                      onDelete: () {
+                                  onWatchHistoryTap: () async{
+                                    await controller.fetchWatchhistoryData();
+                                    Get.to(WatchHistory(),transition: Transition.rightToLeft);},
 
-                                      },
-                                      arguments: '',
-                                    );
+                                  oncollectiontap: () async{
+                await controller.fetchCollectionsData();
+                Get.to(Collections(),transition: Transition.rightToLeft);},
+                                  onUnsubscribeTap: (){
+                            Get.to(Subscription(),transition: Transition.rightToLeft);
                                   },
                                 ),
                               ],

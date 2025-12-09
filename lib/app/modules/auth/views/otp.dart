@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:mompr_em/app/modules/auth/views/changepass.dart';
-import 'package:mompr_em/app/modules/auth/views/verifiedpage.dart';
+import 'package:Nuweli/app/modules/auth/views/changepass.dart';
+import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -140,16 +140,10 @@ Get.back();
                Expanded(
                  child: CustomButton(
                    onPress: () async {
-                     print(controller.fromPage.value);
-                     if(controller.fromPage.value=="signup") {
-                       Get.offAll(Verifiedpage(page: fromPage,),transition: Transition.rightToLeft);
-                     }
-                     else
-                     {
-                       Get.offAll(Changepass(),transition: Transition.rightToLeft);
-                     }
+                  controller.activateAccount(otpController.text.trim());
                    },
                    title:'Verify',
+                   loading: controller.isLoadingverify.value,
                    textColor: Colors.black,
                    gradient: LinearGradient(
                      colors: [AppColor.vividAmber, AppColor.sunnyYellow],

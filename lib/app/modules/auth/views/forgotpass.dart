@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/modules/auth/views/otp.dart';
+import 'package:Nuweli/app/modules/auth/views/otp.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
@@ -20,7 +20,7 @@ class Forgotpassword extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.fromPage.value = "forgot_password";
+    controller.frompage.value = "forgot_password";
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -80,22 +80,23 @@ class Forgotpassword extends StatelessWidget {
               height: 30.h,
             ),
             SizedBox(height: 20.h), // Reduced from 40.h to 32.h
-            CustomButton(
-              onPress: () async {
-                Get.off(Otpverifications(email: c1.text.trim(), fromPage: "forgot_password"),transition: Transition.rightToLeftWithFade);
-              },
-              title: 'Send',
-              textColor: Colors.black,
-              gradient: LinearGradient(
-                colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              width: double.infinity,
-              height: 30.h,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
+    Obx(()=>        CustomButton(
+      onPress: () async {
+        controller.resetPasswordRequest(c1.text.trim());
+      },
+      title: 'Send',
+      loading: controller.isLoadingpass.value,
+      textColor: Colors.black,
+      gradient: LinearGradient(
+        colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      width: double.infinity,
+      height: 30.h,
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w600,
+    ),),
             Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

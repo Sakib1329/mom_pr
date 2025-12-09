@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/res/assets/imageassets.dart';
-import 'package:mompr_em/app/res/colors/color.dart';
-import 'package:mompr_em/app/res/fonts/fonts.dart';
+import 'package:get/get.dart';
+import 'package:Nuweli/app/modules/home/controllers/home_controller.dart';
+import 'package:Nuweli/app/res/colors/color.dart';
+import 'package:Nuweli/app/res/fonts/fonts.dart';
+import '../models/movie_model.dart';
+import '../models/series_model.dart';
 
-class Search extends StatelessWidget {
-  const Search({Key? key}) : super(key: key);
+class SearchScreen extends StatelessWidget {
+  final HomeController controller=Get.find();
+   SearchScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.find();
+    final TextEditingController textController = TextEditingController();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -16,23 +23,43 @@ class Search extends StatelessWidget {
           children: [
             // Search Bar
             Container(
-              margin: EdgeInsets.all(15.w),
+              margin: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color: Colors.grey[800],
                 borderRadius: BorderRadius.circular(8.r),
+
               ),
               child: TextField(
+                controller: textController,
+                onChanged: (value) => controller.onSearchChanged(value),
                 decoration: InputDecoration(
                   hintText: 'Search for a show, movie, genre, e.t.c',
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                  hintStyle: AppTextStyles.montserratRegular.copyWith(
+                    color: AppColor.white,
+                    fontSize: 12.sp,
+                  ),
                   prefixIcon: Icon(Icons.search, color: Colors.grey, size: 22.sp),
+                  suffixIcon: Obx(
+                        () => controller.searchQuery.isNotEmpty
+                        ? IconButton(
+                      icon: Icon(Icons.clear, color: Colors.grey, size: 22.sp),
+                      onPressed: () {
+                        textController.clear();
+                        controller.clearSearch();
+                      },
+                    )
+                        : Container(), // Fallback widget when searchQuery is empty
+                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16.w,
-                    vertical: 12.h,
+                    vertical: 8.h,
                   ),
                 ),
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                style: AppTextStyles.montserratRegular.copyWith(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                ),
               ),
             ),
 
@@ -45,7 +72,6 @@ class Search extends StatelessWidget {
                 style: AppTextStyles.montserratBold.copyWith(
                   color: Colors.white,
                   fontSize: 20.sp,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -54,38 +80,58 @@ class Search extends StatelessWidget {
 
             // Shows List
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                children: const [
-                  ShowItem(
-                    imagePath: ImageAssets.img_6,
-                    title: 'Citation',
+              child: Obx(
+                    () => controller.isLoading.value
+                    ? Center(child: CircularProgressIndicator(color: Colors.white))
+                    : controller.errorMessage.isNotEmpty
+                    ? Center(
+                  child: Text(
+                    controller.errorMessage.value,
+                    style: AppTextStyles.montserratRegular.copyWith(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                    ),
                   ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_7,
-                    title: 'Cloture',
+                )
+                    : controller.items.isEmpty
+                    ? Center(
+                  child: Text(
+                    'No results found',
+                    style: AppTextStyles.montserratRegular.copyWith(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                    ),
                   ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_8,
-                    title: 'The Setup',
-                  ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_9,
-                    title: 'Breaking Bad',
-                  ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_10,
-                    title: 'Ozark',
-                  ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_11,
-                    title: 'The Governor',
-                  ),
-                  ShowItem(
-                    imagePath: ImageAssets.img_12,
-                    title: 'Your Excellency',
-                  ),
-                ],
+                )
+                    : ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  itemCount: controller.items.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.items[index];
+                    final title = item is Movie ? item.title : item.name;
+                    final imageUrl = (item is Movie ? item.postersUrl : item.postersUrl).isNotEmpty
+                        ? (item is Movie ? item.postersUrl.first : item.postersUrl.first)
+                        : '';
+
+                    return ShowItemNetwork(
+                      imageUrl: imageUrl,
+                      title: title,
+                      onTap: () async {
+                        final item = controller.items[index];
+                        final alias = (item is Movie)
+                            ? (item.aliasType.isNotEmpty ? item.aliasType : 'movie')
+                            : (item is Series && item.aliasType.isNotEmpty ? item.aliasType : 'series');
+
+                        if (alias.toLowerCase() == 'movie') {
+                          await controller.fetchMovieDetails(item.id, alias);
+                        } else {
+                          await controller.fetchSeriesDetails(item.id, alias);
+                        }
+                      },
+
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -95,156 +141,100 @@ class Search extends StatelessWidget {
   }
 }
 
-class ShowItem extends StatelessWidget {
-  final String imagePath;
-  final String title;
-
-  const ShowItem({
-    Key? key,
-    required this.imagePath,
-    required this.title,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColor.customDarkGray2,
-      margin: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        children: [
-          // Thumbnail Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4.r),
-            child: Container(
-              width: 120.w,
-              height: 80.h,
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[800],
-                    child: Icon(
-                      Icons.image,
-                      color: Colors.grey,
-                      size: 30.sp,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          SizedBox(width: 12.w),
-
-          // Title
-          Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.montserratSemiBold.copyWith(
-                color: Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-
-          // Play Button
-          Container(
-            padding: EdgeInsets.all(8.w),
-            child: Icon(
-              Icons.play_circle_outline,
-              color: Colors.white,
-              size: 32.sp,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Alternative ShowItem widget with Network Image
 class ShowItemNetwork extends StatelessWidget {
   final String imageUrl;
   final String title;
+  final VoidCallback onTap; // ✅ Added callback
 
   const ShowItemNetwork({
     Key? key,
     required this.imageUrl,
     required this.title,
+    required this.onTap, // ✅ Required in constructor
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        children: [
-          // Thumbnail Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4.r),
-            child: Container(
-              width: 120.w,
-              height: 68.h,
-              color: Colors.grey[800],
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    color: Colors.grey[800],
-                    child: Center(
-                      child: SizedBox(
-                        width: 20.w,
-                        height: 20.w,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.w,
+    return GestureDetector( // ✅ Detect tap anywhere on the row
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 8.h),
+        color: AppColor.darkGray2,
+        child: Row(
+          children: [
+            // Thumbnail Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r), // Optional rounded corners
+              child: Container(
+                width: 120.w,
+                height: 68.h,
+                color: Colors.black,
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: Colors.grey[800],
+                      child: Center(
+                        child: SizedBox(
+                          width: 20.w,
+                          height: 20.w,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.w,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[800],
-                    child: Icon(
-                      Icons.image,
-                      color: Colors.grey,
-                      size: 30.sp,
-                    ),
-                  );
-                },
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.black,
+                      child: Icon(
+                        Icons.image,
+                        color: AppColor.vividAmber,
+                        size: 30.sp,
+                      ),
+                    );
+                  },
+                )
+                    : Container(
+                  color: Colors.black,
+                  child: Icon(
+                    Icons.image,
+                    color: AppColor.vividAmber,
+                    size: 30.sp,
+                  ),
+                ),
               ),
             ),
-          ),
 
-          SizedBox(width: 12.w),
+            SizedBox(width: 12.w),
 
-          // Title
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
+            // Title
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyles.montserratSemiBold.copyWith(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ),
+
+            // Play Button
+            Container(
+              padding: EdgeInsets.all(8.w),
+              child: Icon(
+                Icons.play_circle_outline,
                 color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
+                size: 32.sp,
               ),
             ),
-          ),
-
-          // Play Button
-          Container(
-            padding: EdgeInsets.all(8.w),
-            child: Icon(
-              Icons.play_circle_outline,
-              color: Colors.white,
-              size: 32.sp,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

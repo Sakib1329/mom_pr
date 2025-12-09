@@ -30,7 +30,7 @@ class AppTextStyles {
   static final TextStyle montserratBold = TextStyle(
     fontFamily: 'Montserrat',
     fontWeight: FontWeight.w700,
-    fontSize: 20.sp,
+    fontSize: 18.sp,
     color: AppColor.lightSkyBlue,
   );
 }

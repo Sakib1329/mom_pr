@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mompr_em/app/modules/onboard/controllers/onboard_controller.dart';
+import 'package:Nuweli/app/modules/onboard/controllers/onboard_controller.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';

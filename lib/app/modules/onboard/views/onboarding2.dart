@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:mompr_em/app/modules/onboard/controllers/onboard_controller.dart';
+import 'package:Nuweli/app/modules/onboard/controllers/onboard_controller.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
@@ -21,8 +21,8 @@ class Onboarding2 extends StatelessWidget {
         centerTitle: true,
         title: SvgPicture.asset(
           'assets/icons/svg1.svg',
-          height: 50.h,
-          width: 50.w,
+          height: 20.h,
+          width: 20.w,
         ),
 
 

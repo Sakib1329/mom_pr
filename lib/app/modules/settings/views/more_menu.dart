@@ -4,18 +4,26 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:mompr_em/app/modules/auth/views/login.dart';
-import 'package:mompr_em/app/modules/settings/views/help&support.dart';
-import 'package:mompr_em/app/modules/settings/views/mylist.dart';
-import 'package:mompr_em/app/modules/settings/views/profile.dart';
-import 'package:mompr_em/app/modules/settings/views/subscribtion.dart';
-import 'package:mompr_em/app/res/assets/imageassets.dart';
-import 'package:mompr_em/app/res/colors/color.dart';
+import 'package:Nuweli/app/modules/auth/views/login.dart';
+import 'package:Nuweli/app/modules/home/controllers/home_controller.dart';
+import 'package:Nuweli/app/modules/settings/controllers/bottomsheetController.dart';
+import 'package:Nuweli/app/modules/settings/controllers/settingcontroller.dart';
+import 'package:Nuweli/app/modules/settings/views/help&support.dart';
+import 'package:Nuweli/app/modules/settings/views/mylist.dart';
+import 'package:Nuweli/app/modules/settings/views/profile.dart';
+import 'package:Nuweli/app/modules/settings/views/subscribtion.dart';
+import 'package:Nuweli/app/modules/settings/views/termsandcondition.dart';
+import 'package:Nuweli/app/res/assets/imageassets.dart';
+import 'package:Nuweli/app/res/colors/color.dart';
 
+import '../../../constants/appconstant.dart';
 import '../../../res/fonts/fonts.dart';
 
 class MoreMenu extends StatelessWidget {
-  const MoreMenu({super.key});
+  final HomeController controller=Get.find();
+  final Settingcontroller settingcontroller=Get.find();
+  final BottomSheetController bs=Get.find();
+   MoreMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,32 +34,58 @@ class MoreMenu extends StatelessWidget {
           children: [
             // Profile Section
             Container(
-              padding: EdgeInsets.all(16.w), // smaller
+              padding: EdgeInsets.all(16.w),
               child: Column(
                 children: [
-                  // Profile Image
-                  Container(
-                    width: 70.w, // smaller
-                    height: 70.w,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5.w),
-                      image: const DecorationImage(
-                        image: AssetImage(ImageAssets.img_1),
-                        fit: BoxFit.cover,
+                  // ✅ Profile Image (Dynamic)
+                  Obx(() {
+                    final url = AppConstants.baseUrl;
+                    final profileImage = settingcontroller.profileImage.value;
+                    final localFile = bs.pickedImage.value;
+
+                    final double size = 70.w;
+
+                    return Container(
+                      width: size,
+                      height: size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColor.vividAmber, width: 1.5.w),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: localFile != null
+                              ? FileImage(localFile)
+                              : (profileImage.isNotEmpty
+                              ? NetworkImage("$profileImage") as ImageProvider
+                              : const AssetImage(ImageAssets.img_1)),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
+
                   SizedBox(height: 10.h),
 
                   // Name
-                  Text(
-                    'Awad Arman',
-                    style: AppTextStyles.montserratRegular.copyWith(
-                      color: AppColor.translucentWhite,
-                      fontSize: 16.sp, // smaller
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      settingcontroller.firstName.value,
+                      style: AppTextStyles.montserratRegular.copyWith(
+                        color: AppColor.translucentWhite,
+                        fontSize: 16.sp,
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 5.w,),
+                    Text(
+                      settingcontroller.lastName.value,
+                      style: AppTextStyles.montserratRegular.copyWith(
+                        color: AppColor.translucentWhite,
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ],
+                )
                 ],
               ),
             ),
@@ -72,7 +106,7 @@ class MoreMenu extends StatelessWidget {
                       SvgPicture.asset(ImageAssets.svg20, height: 20.h),
                       SizedBox(width: 10.w),
                       Text(
-                        'Tell friends about WERLI',
+                        'Tell friends about NUWELI',
                         style: AppTextStyles.montserratRegular.copyWith(
                           color: Colors.white,
                           fontSize: 16.sp,
@@ -82,22 +116,29 @@ class MoreMenu extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 10.h),
-                  Text(
-                    'Lorem ipsum dolor sit consectetur adipiscing elit. Sit purus felis semper quis risus leo ornare pulvinar amet...',
+                  Text("${settingcontroller.privacyContent.value}",
                     style: AppTextStyles.montserratMedium.copyWith(
                       color: Colors.grey[400],
                       fontSize: 12.sp,
                       height: 1.3,
                     ),
+                    maxLines: 2,
+                    softWrap: true,
                   ),
                   SizedBox(height: 12.h),
-                  Text(
-                    'Terms & Conditions',
-                    style: AppTextStyles.montserratMedium.copyWith(
-                      color: AppColor.translucentWhite,
-                      fontSize: 11.sp,
-                      decoration: TextDecoration.underline,
-                      decorationColor: AppColor.translucentWhite,
+                  GestureDetector(
+                    onTap: (){
+                       settingcontroller.loadPrivacyPolicy();
+                      Get.to(Privacypolicy(),transition: Transition.rightToLeft);
+                    },
+                    child: Text(
+                      'Terms & Conditions',
+                      style: AppTextStyles.montserratMedium.copyWith(
+                        color: AppColor.translucentWhite,
+                        fontSize: 11.sp,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColor.translucentWhite,
+                      ),
                     ),
                   ),
                   SizedBox(height: 12.h),
@@ -188,7 +229,8 @@ class MoreMenu extends StatelessWidget {
                 child: Column(
                   children: [
                   GestureDetector(
-                    onTap: (){
+                    onTap: ()async{
+                      await controller.fetchWatchLaterData();
                       Get.to(Mylist(),transition: Transition.rightToLeft);
                     },
                     child: Row(
@@ -212,8 +254,17 @@ class MoreMenu extends StatelessWidget {
                     ),
                     _MenuItem(
                       icon: Icons.account_circle_outlined,
+                      title: 'Downloads',
+                      onTap: () async{
+                        await settingcontroller.fetchProfileData();
+                        Get.to(ProfilePage(),transition: Transition.rightToLeft);
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.account_circle_outlined,
                       title: 'Account',
-                      onTap: () {
+                      onTap: () async{
+                        await settingcontroller.fetchProfileData();
                         Get.to(ProfilePage(),transition: Transition.rightToLeft);
                       },
                     ),
@@ -222,7 +273,7 @@ class MoreMenu extends StatelessWidget {
                       icon: Icons.help_outline,
                       title: 'Help',
                       onTap: () {
-                        Get.to(Helpandsupport(),transition: Transition.rightToLeft);
+                        Get.to(HelpAndSupport(),transition: Transition.rightToLeft);
                       },
                     ),
 
@@ -230,7 +281,7 @@ class MoreMenu extends StatelessWidget {
                       icon: Icons.logout,
                       title: 'Sign Out',
                       onTap: () {
-                        Get.offAll(Login(),transition: Transition.rightToLeft);
+settingcontroller.signOut();
                       },
                     ),
 
