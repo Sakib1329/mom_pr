@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:Nuweli/app/res/assets/imageassets.dart';
+import '../../../res/assets/imageassets.dart';
 import '../../../res/fonts/fonts.dart';
 import '../controllers/comingsoon_controller.dart';
 import '../widgets/moviecard_widget.dart';
 import '../widgets/notification_card.dart';
-
 
 class ComingSoon extends StatelessWidget {
   const ComingSoon({super.key});
@@ -28,7 +27,7 @@ class ComingSoon extends StatelessWidget {
                     SvgPicture.asset(ImageAssets.svg19, height: 30.h),
                     SizedBox(width: 10.w),
                     Text(
-                      "Notifications",
+                      "notifications".tr,
                       style: AppTextStyles.montserratSemiBold.copyWith(
                         color: Colors.white,
                         fontSize: 18.sp,
@@ -38,20 +37,20 @@ class ComingSoon extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 10.h,),
+              SizedBox(height: 10.h),
               Obx(() {
                 if (controller.isLoading.value) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (controller.error.value.isNotEmpty) {
                   return Center(child: Text(controller.error.value));
                 }
                 if (controller.items.isEmpty) {
-                  return Center(child: Text('No upcoming content'));
+                  return Center(child: Text('no_upcoming_content'.tr));
                 }
                 return ListView.builder(
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.items.length,
                   itemBuilder: (context, index) {
                     final item = controller.items[index];
@@ -69,10 +68,11 @@ class ComingSoon extends StatelessWidget {
                       imageUrl: item.imageUrl ?? ImageAssets.img_14,
                       genres: item.genres,
                       seasonInfo: item.releaseInfo,
-                      onRemindMeTap: (){
+                      onRemindMeTap: () {
                         controller.remindMe(item.id);
                       },
-                      onShareTap: () => print('Share: ${item.title}'), fileUuid: item.fileUuid??"",
+                      onShareTap: () => print('Share: ${item.title}'),
+                      fileUuid: item.fileUuid ?? "",
                     );
                   },
                 );

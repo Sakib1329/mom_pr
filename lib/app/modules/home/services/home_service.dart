@@ -203,34 +203,50 @@ static  Future<Series> getSeriesDetails(int id, String aliastype) async {
     }
   }
 
-  Future<Map<String, String>> getVideoPlaylist(String fileUuid) async {
-    try {
-      final token = box.read('loginToken');
-      if (token == null) {
-        throw Exception('No login token found');
-      }
-      final response = await http.post(
-        Uri.parse('${AppConstants.baseUrl}/movie_and_series/$fileUuid/get_video_playlist/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({}),
-      );
+ Future<Map<String, String>> getVideoPlaylist(
+     String fileUuid, {
+       bool offline = false,
+     }) async {
+   try {
+     final token = box.read('loginToken');
+     if (token == null) {
+       throw Exception('No login token found');
+     }
 
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        return {
-          'otp': jsonData['otp'] as String,
-          'playbackInfo': jsonData['playbackInfo'] as String,
-        };
-      } else {
-        throw Exception('Failed to load video playlist: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error fetching video playlist: $e');
-    }
-  }
+     final uri = Uri.parse(
+       '${AppConstants.baseUrl}/movie_and_series/$fileUuid/get_video_playlist/',
+     ).replace(
+       queryParameters: {
+         if (offline) 'offline': 'true',
+       },
+     );
+
+     final response = await http.post(
+       uri,
+       headers: {
+         'Content-Type': 'application/json',
+         'Authorization': 'Bearer $token',
+       },
+       body: jsonEncode({}),
+     );
+
+     if (response.statusCode == 200) {
+       final jsonData = jsonDecode(response.body);
+
+       return {
+         'otp': jsonData['otp'] as String,
+         'playbackInfo': jsonData['playbackInfo'] as String,
+       };
+     } else {
+       throw Exception(
+         'Failed to load video playlist: ${response.statusCode} → ${response.body}',
+       );
+     }
+   } catch (e) {
+     throw Exception('Error fetching video playlist: $e');
+   }
+ }
+
 
   Future<List<String>> getGenres() async {
     try {
@@ -287,7 +303,7 @@ static  Future<Series> getSeriesDetails(int id, String aliastype) async {
     }
   }
 
-  // New method to remove from watch later
+
   Future<void> removeFromWatchLater(int id, String aliasType) async {
     try {
       final token = box.read('loginToken');

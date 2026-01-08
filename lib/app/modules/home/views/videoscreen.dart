@@ -35,7 +35,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
           playbackInfo: creds['playbackInfo']!,
           embedInfoOptions: EmbedInfoOptions(
             autoplay: true,
-            // customPlayerId: "YOUR_CUSTOM_PLAYER_ID", // Optional, add if provided by VdoCipher
           ),
         );
         _isLoading = false;
@@ -74,7 +73,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         onPlayerCreated: (controller) {
           controller.addListener(() {
             setState(() {
-              // Log playback state for debugging
+
               print('Player event: isPlaying=${controller.value.isPlaying}, '
                   'isBuffering=${controller.value.isBuffering}, '
                   'isEnded=${controller.value.isEnded}');
@@ -90,10 +89,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         onFullscreenChange: (isFullscreen) => print('Fullscreen: $isFullscreen'),
       )
           : Center(
-        child: Text(
-          'Failed to load video',
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-        ),
+        child: Text('failed_to_load_video'.tr, style: TextStyle(color: Colors.white, fontSize: 16.sp)),
       ),
     );
   }

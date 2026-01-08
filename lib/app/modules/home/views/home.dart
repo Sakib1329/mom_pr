@@ -6,9 +6,7 @@ import 'package:get/get.dart';
 import 'package:Nuweli/app/modules/home/controllers/home_controller.dart';
 import 'package:Nuweli/app/modules/home/controllers/navcontroller.dart';
 import 'package:Nuweli/app/modules/home/views/category_home.dart';
-import 'package:Nuweli/app/modules/home/views/comedies.dart';
 
-import 'package:Nuweli/app/modules/home/views/liveshow.dart';
 import 'package:Nuweli/app/modules/home/views/movie.dart';
 import 'package:Nuweli/app/modules/home/views/music_video.dart';
 import 'package:Nuweli/app/modules/home/views/series.dart';

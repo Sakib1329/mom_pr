@@ -1,0 +1,241 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/Get.dart';
+import 'package:vdocipher_flutter/vdocipher_flutter.dart';
+import '../../../res/colors/color.dart';
+import 'offlineplayer.dart';
+
+class DownloadsScreen extends StatefulWidget {
+  const DownloadsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<DownloadsScreen> createState() => _DownloadsScreenState();
+}
+
+class _DownloadsScreenState extends State<DownloadsScreen>
+    implements EventListener {
+  List<DownloadStatus> downloadedVideos = [];
+  final VdoDownloadManager _downloadManager = VdoDownloadManager.getInstance();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDownloads();
+    _downloadManager.addDownloadEventListener(this);
+  }
+
+  @override
+  void dispose() {
+    _downloadManager.removeDownloadEventListener(this);
+    super.dispose();
+  }
+
+  @override
+  void onChanged(String mediaId, DownloadStatus status) => _refresh();
+
+  @override
+  void onCompleted(String mediaId, DownloadStatus status) {
+    debugPrint('onCompleted triggered for mediaId: $mediaId');
+    _refresh();
+
+    // Extra force refresh after delay
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted) {
+        debugPrint('Force refresh after completion');
+        _loadDownloads();
+      }
+    });
+  }
+
+  @override
+  void onDeleted(String mediaId) => _refresh();
+
+  @override
+  void onError(String mediaId, VdoError error) {
+    debugPrint('Download error: $error');
+    _refresh();
+  }
+
+  @override
+  void onFailed(String mediaId, DownloadStatus status) => _refresh();
+
+  @override
+  void onQueued(String mediaId, DownloadStatus status) => _refresh();
+
+  void _refresh() {
+    if (mounted) {
+      _loadDownloads();
+    }
+  }
+
+  Future<void> _loadDownloads() async {
+    try {
+      final List<DownloadStatus> all = await _downloadManager.query(Query());
+
+      // Debug: See all downloads
+      for (var status in all) {
+        debugPrint(
+            'Download: ${status.mediaInfo?.title ?? 'No title'} | '
+                'mediaId: ${status.mediaInfo?.mediaId} | '
+                'status: ${status.status}');
+      }
+
+      // FINAL WORKING FILTER
+      // Your version uses status == 5 for completed
+      // We ignore isExpired because it's a Future<bool?> and causes issues
+      final completed = all.where((status) {
+        return status.status == VdoDownloadManager.STATUS_COMPLETED || status.status == 5;
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          downloadedVideos = completed;
+        });
+      }
+
+      debugPrint('Found ${completed.length} completed offline videos');
+    } catch (e, stack) {
+      debugPrint('Error loading downloads: $e\n$stack');
+    }
+  }
+
+  void _deleteDownload(String mediaId) {
+    _downloadManager.remove(mediaId);
+    Get.snackbar(
+      'deleted'.tr,
+      'video_removed_from_downloads'.tr,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+      duration: const Duration(seconds: 3),
+    );
+    _loadDownloads();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColor.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'downloads'.tr,
+          style: TextStyle(color: Colors.white, fontSize: 22.sp),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Get.back(),
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadDownloads,
+        child: downloadedVideos.isEmpty
+            ? Center(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.file_download_off,
+                  size: 100.sp,
+                  color: AppColor.customGray,
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  'no_downloads_yet'.tr,
+                  style: TextStyle(color: Colors.white, fontSize: 20.sp),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  'tap_download_on_movie_details'.tr,
+                  style: TextStyle(
+                      color: AppColor.customGray, fontSize: 14.sp),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        )
+            : ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          itemCount: downloadedVideos.length,
+          itemBuilder: (context, index) {
+            final status = downloadedVideos[index];
+            final title = status.mediaInfo?.title ?? 'untitled'.tr;
+            final mediaId = status.mediaInfo?.mediaId ?? '';
+
+            return GestureDetector(
+              onTap: () {
+                if (mediaId.isEmpty) return;
+                Get.to(() => OfflinePlayerScreen(
+                  mediaId: mediaId,
+                  title: title,
+                ));
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8.h),
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 120.w,
+                      height: 70.h,
+                      decoration: BoxDecoration(
+                        color: AppColor.customDarkGray2,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        Icons.play_circle_fill,
+                        color: AppColor.vividAmber,
+                        size: 40.sp,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'complete_offline'.tr,
+                            style: TextStyle(
+                              color: AppColor.customGray,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete_forever,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => _deleteDownload(mediaId),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:Nuweli/app/modules/auth/views/forgotpass.dart';
-
 import 'package:Nuweli/app/modules/auth/views/signup.dart';
 import 'package:Nuweli/app/modules/home/views/navbar.dart';
 
@@ -26,7 +25,6 @@ class Login extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-
         title: SvgPicture.asset(
           'assets/icons/svg1.svg',
           height: 20.h,
@@ -36,14 +34,14 @@ class Login extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15.w,vertical: 15.h),
+          padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Title
               Text(
-                'Welcome Back!',
+                'welcome_back'.tr,
                 style: AppTextStyles.montserratRegular.copyWith(
                   color: Colors.white,
                   fontSize: 25.sp,
@@ -53,7 +51,7 @@ class Login extends StatelessWidget {
               SizedBox(height: 6.h),
               // Subtitle
               Text(
-                'Please log in to your account and start the adventure',
+                'login_subtitle'.tr,
                 style: AppTextStyles.montserratRegular.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp,
@@ -61,9 +59,9 @@ class Login extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20.h),
-              // Email
+              // Email Label
               Text(
-                'Email',
+                'email'.tr,
                 style: AppTextStyles.montserratRegular.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp,
@@ -71,8 +69,8 @@ class Login extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               InputTextWidget(
-controller: controller.emailController,
-                hintText: 'Email',
+                controller: controller.emailController,
+                hintText: 'email'.tr,
                 onChanged: (value) {},
                 leading: true,
                 leadingIcon: ImageAssets.svg13,
@@ -85,9 +83,9 @@ controller: controller.emailController,
               ),
               SizedBox(height: 14.h),
 
-              // Password
+              // Password Label
               Text(
-                'Password',
+                'password'.tr,
                 style: AppTextStyles.montserratRegular.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp,
@@ -95,8 +93,8 @@ controller: controller.emailController,
               ),
               SizedBox(height: 6.h),
               InputTextWidget(
-controller: controller.passwordController,
-                hintText: 'Enter your password',
+                controller: controller.passwordController,
+                hintText: 'enter_password'.tr,
                 onChanged: (value) {},
                 obscureText: true,
                 passwordIcon: ImageAssets.obsecure,
@@ -112,27 +110,27 @@ controller: controller.passwordController,
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                Obx(()=>  SizedBox(
-                  width: 18.w,
-                  height: 18.h,
-                  child: Checkbox(
-                    value: controller.ischecked.value,
-                    onChanged: (value) {
-                      controller.ischecked.toggle();
-                    },
-                    fillColor: MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.selected)) {
-                        return const Color(0xFFFFD700);
-                      }
-                      return Colors.transparent;
-                    }),
-                    checkColor: Colors.black,
-                    side: const BorderSide(color: Color(0xFF404040)),
-                  ),
-                ),),
+                  Obx(() => SizedBox(
+                    width: 18.w,
+                    height: 18.h,
+                    child: Checkbox(
+                      value: controller.ischecked.value,
+                      onChanged: (value) {
+                        controller.ischecked.toggle();
+                      },
+                      fillColor: MaterialStateProperty.resolveWith((states) {
+                        if (states.contains(MaterialState.selected)) {
+                          return const Color(0xFFFFD700);
+                        }
+                        return Colors.transparent;
+                      }),
+                      checkColor: Colors.black,
+                      side: const BorderSide(color: Color(0xFF404040)),
+                    ),
+                  )),
                   SizedBox(width: 10.w),
                   Text(
-                  "Remember me",
+                    "remember_me".tr,
                     style: AppTextStyles.montserratRegular.copyWith(
                       fontSize: 12.spMax,
                       color: AppColor.white,
@@ -151,33 +149,31 @@ controller: controller.passwordController,
                         end: Alignment.bottomRight,
                       ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
                       child: Text(
-                        "Forgot password?",
+                        "forgot_password".tr,
                         style: AppTextStyles.montserratSemiBold.copyWith(
                           fontSize: 12.spMax,
-
                         ),
                       ),
                     ),
                   )
-
                 ],
               ),
               SizedBox(height: 20.h),
-      Obx(()=>        CustomButton(
-        onPress: controller.login,
-        loading: controller.isLoading.value,
-        title: 'Log in',
-        textColor: Colors.black,
-        gradient: LinearGradient(
-          colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        width: double.infinity,
-        height: 30.h,
-        fontSize: 14.sp,
-        fontWeight: FontWeight.w600,
-      ),),
+              Obx(() => CustomButton(
+                onPress: controller.login,
+                loading: controller.isLoading.value,
+                title: 'log_in'.tr,
+                textColor: Colors.black,
+                gradient: LinearGradient(
+                  colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                width: double.infinity,
+                height: 30.h,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              )),
               SizedBox(height: 20.h),
               Row(
                 children: [
@@ -189,7 +185,7 @@ controller: controller.passwordController,
                     ),
                   ),
                   Text(
-                    "or",
+                    "or".tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16.spMax,
@@ -212,7 +208,7 @@ controller: controller.passwordController,
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: ()async{
+                      onTap: () async {
                         await controller.signInWithGoogle();
                       },
                       child: Container(
@@ -255,23 +251,18 @@ controller: controller.passwordController,
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Don\'t have an account?  ',
+                        text: 'no_account'.tr,
                         style: AppTextStyles.montserratRegular.copyWith(
                           color: AppColor.mediumGrey,
                           fontSize: 14.sp,
                         ),
                       ),
                       TextSpan(
-                        onEnter: (event) {
-                          Get.to(Login(),transition: Transition.rightToLeftWithFade);
-                        },
-
-                        text: 'Sign up',
+                        text: 'sign_up'.tr,
                         style: AppTextStyles.montserratMedium.copyWith(
                             color: AppColor.sunnyYellow,
                             fontSize: 14.sp,
-                            decoration: TextDecoration.underline
-                        ),
+                            decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Get.to(() => Signup(), transition: Transition.rightToLeftWithFade);
@@ -281,7 +272,6 @@ controller: controller.passwordController,
                   ),
                 ),
               ),
-
             ],
           ),
         ),

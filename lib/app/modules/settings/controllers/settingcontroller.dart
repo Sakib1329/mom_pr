@@ -277,6 +277,7 @@ class Settingcontroller extends GetxController {
     required String period,
     required bool isMonCash,
   }) async {
+    print(isMonCash);
     try {
       isLoading.value = true;
 
@@ -297,12 +298,14 @@ class Settingcontroller extends GetxController {
         );
       }
     } catch (e) {
+
       Get.snackbar(
         'Error',
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+
     } finally {
       isLoading.value = false;
     }

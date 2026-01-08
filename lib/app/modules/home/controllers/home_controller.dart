@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:Nuweli/app/modules/home/models/allcontent_model.dart';
 import 'package:Nuweli/app/modules/home/views/details.dart';
 import 'package:Nuweli/app/modules/home/views/series_details.dart';
@@ -20,7 +20,7 @@ class HomeController extends GetxController {
 
   var currentIndex = 0.obs;
   RxBool issubscribed = false.obs;
-  var selectedSeasonIndex = 0.obs; // Added for series season selection
+  var selectedSeasonIndex = 0.obs;
 
   // Search
   var items = <dynamic>[].obs;
@@ -84,9 +84,7 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     ever(_navController.selectedCategory, (genreName) {
-      if (genreName.isNotEmpty &&
-          genreName.toLowerCase() != 'all' &&
-          genreName != 'My List') {
+      if (genreName.isNotEmpty && genreName.toLowerCase() != 'all' && genreName != 'My List') {
         onGenreSelected(genreName);
       } else if (genreName == 'All') {
         fetchAllMovies();
@@ -121,7 +119,6 @@ class HomeController extends GetxController {
       final searchResponse = await _homeService.searchAll(title: title);
       items.assignAll([...searchResponse.movies, ...searchResponse.series]);
     } catch (e) {
-
       errorMessage('Failed to load search data: $e');
     } finally {
       isLoading(false);
@@ -141,17 +138,13 @@ class HomeController extends GetxController {
     fetchSearchData();
   }
 
-
   Future<void> fetchMovieDetails(int id, String aliastype) async {
     try {
-      isDetailsLoading(false);
+      isDetailsLoading(true);
       detailsErrorMessage('');
       final details = await HomeService.getMovieDetails(id, aliastype);
       movieDetails.value = details;
-      Get.to(
-        () => MovieDetailsPage(),
-        transition: Transition.rightToLeftWithFade,
-      );
+      Get.to(() => MovieDetailsPage(), transition: Transition.rightToLeftWithFade);
     } catch (e) {
       detailsErrorMessage('Failed to load movie details: $e');
     } finally {
@@ -165,21 +158,13 @@ class HomeController extends GetxController {
       SeriesdetailsErrorMessage('');
       final details = await HomeService.getSeriesDetails(id, aliastype);
       SeriesDetails.value = details;
-      selectedSeasonIndex.value = 0; // Reset season index on new series
-      Get.to(
-        () => SeriesDetailsPage(),
-        transition: Transition.rightToLeftWithFade,
-      );
+      selectedSeasonIndex.value = 0;
+      Get.to(() => SeriesDetailsPage(), transition: Transition.rightToLeftWithFade);
     } catch (e) {
       SeriesdetailsErrorMessage('Failed to load series details: $e');
     } finally {
       isSeriesDetailsLoading(false);
     }
-  }
-
-  void clearMovieDetails() {
-    movieDetails.value = null;
-    detailsErrorMessage('');
   }
 
   Future<void> fetchWatchhistoryData() async {
@@ -192,7 +177,6 @@ class HomeController extends GetxController {
       watchjistoryitems.assignAll([...movies, ...series]);
     } catch (e) {
       watchjistoryErrorMessage('Failed to load watch history data: $e');
-
     } finally {
       isWatchhistoryLoading(false);
     }
@@ -207,22 +191,21 @@ class HomeController extends GetxController {
       final series = searchResponse.series;
       collectionitems.assignAll([...movies, ...series]);
     } catch (e) {
-      collectionErrorMessage('Failed to load watch history data: $e');
-
+      collectionErrorMessage('Failed to load collections data: $e');
     } finally {
       iscollectionLoading(false);
     }
   }
 
-  Future<void> removeFromWatchLater(int id, String aliasType) async {
+  Future<void> addToWatchLater(int id, String aliasType) async {
     try {
       isWatchLaterLoading(true);
       watchLaterErrorMessage('');
-      await _homeService.removeFromWatchLater(id, aliasType);
+      await _homeService.addToWatchLater(id, aliasType);
       await fetchWatchLaterData();
       Get.snackbar(
-        'Removed from Watch Later',
-        'Item has been removed successfully!',
+        'added_to_watch_later'.tr,
+        'added_to_watch_later_msg'.tr,
         backgroundColor: AppColor.vividAmber,
         colorText: Colors.black,
         snackPosition: SnackPosition.BOTTOM,
@@ -231,11 +214,10 @@ class HomeController extends GetxController {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      watchLaterErrorMessage('Failed to remove from watch later: $e');
-
+      watchLaterErrorMessage('Failed to add to watch later: $e');
       Get.snackbar(
         'Error',
-        'Failed to remove from Watch Later',
+        'failed_add_watch_later'.tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -248,91 +230,15 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> fetchWatchLaterData() async {
+  Future<void> removeFromWatchLater(int id, String aliasType) async {
     try {
       isWatchLaterLoading(true);
       watchLaterErrorMessage('');
-      final searchResponse = await _homeService.getWatchLater();
-      final movies = searchResponse.movies;
-      final series = searchResponse.series;
-      watchLaterItems.assignAll([...movies, ...series]);
-    } catch (e) {
-      watchLaterErrorMessage('Failed to load watch later data: $e');
-
-    } finally {
-      isWatchLaterLoading(false);
-    }
-  }
-  /// 🔹 Fetch and update like status for a movie
-  Future<void> likeMovie(int id, String aliasType) async {
-    try {
-      final updatedMovie = await _homeService.likeItem(id, aliasType);
-await fetchMovieDetails(id, aliasType);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update like: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
-  /// 🔹 Fetch and update dislike status for a movie
-  Future<void> dislikeMovie(int id, String aliasType) async {
-    try {
-      final updatedMovie = await _homeService.dislikeContent(id, aliasType);
-      await fetchMovieDetails(id, aliasType);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update dislike: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
-  /// 🔹 Fetch and update like status for a series
-  Future<void> likeSeries(int id, String aliasType) async {
-    try {
-      final updatedSeries = await _homeService.likeItem(id, aliasType);
-      await fetchSeriesDetails(id, aliasType);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update like: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
-  /// 🔹 Fetch and update dislike status for a series
-  Future<void> dislikeSeries(int id, String aliasType) async {
-    try {
-      final updatedSeries = await _homeService.dislikeContent(id, aliasType);
-      await fetchSeriesDetails(id, aliasType);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update dislike: $e',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
-
-  Future<void> fetchGenres() async {
-    try {
-      isGenresLoading(true);
-      genresErrorMessage('');
-      final genres = await _homeService.getGenres();
-      final capitalizedGenres = genres
-          .map((genre) => genre.capitalizeFirst!)
-          .toList();
-      genre.assignAll(capitalizedGenres);
-    } catch (e) {
-      genresErrorMessage('Failed to load genres: $e');
-
-    } finally {
-      isGenresLoading(false);
-    }
-  }
-
-  Future<void> addToWatchLater(int id, String aliasType) async {
-    try {
-      isWatchLaterLoading(true);
-      watchLaterErrorMessage('');
-      await _homeService.addToWatchLater(id, aliasType);
+      await _homeService.removeFromWatchLater(id, aliasType);
       await fetchWatchLaterData();
       Get.snackbar(
-        'Added to Watch Later',
-        'Item has been added successfully!',
+        'removed_from_watch_later'.tr,
+        'removed_from_watch_later_msg'.tr,
         backgroundColor: AppColor.vividAmber,
         colorText: Colors.black,
         snackPosition: SnackPosition.BOTTOM,
@@ -341,11 +247,10 @@ await fetchMovieDetails(id, aliasType);
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      watchLaterErrorMessage('Failed to add to watch later: $e');
-
+      watchLaterErrorMessage('Failed to remove from watch later: $e');
       Get.snackbar(
         'Error',
-        'Failed to add to Watch Later',
+        'failed_remove_watch_later'.tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -365,8 +270,8 @@ await fetchMovieDetails(id, aliasType);
       await _homeService.removeFromWatchhistory(id, aliasType);
       await fetchWatchhistoryData();
       Get.snackbar(
-        'Removed from Watch History',
-        'Item has been removed successfully!',
+        'removed_from_watch_history'.tr,
+        'removed_from_watch_history_msg'.tr,
         backgroundColor: AppColor.vividAmber,
         colorText: Colors.black,
         snackPosition: SnackPosition.BOTTOM,
@@ -376,10 +281,9 @@ await fetchMovieDetails(id, aliasType);
       );
     } catch (e) {
       watchjistoryErrorMessage('Failed to remove from watch history: $e');
-
       Get.snackbar(
         'Error',
-        'Failed to remove from Watch History',
+        'failed_remove_watch_history'.tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -392,27 +296,78 @@ await fetchMovieDetails(id, aliasType);
     }
   }
 
+  Future<void> fetchWatchLaterData() async {
+    try {
+      isWatchLaterLoading(true);
+      watchLaterErrorMessage('');
+      final searchResponse = await _homeService.getWatchLater();
+      final movies = searchResponse.movies;
+      final series = searchResponse.series;
+      watchLaterItems.assignAll([...movies, ...series]);
+    } catch (e) {
+      watchLaterErrorMessage('Failed to load watch later data: $e');
+    } finally {
+      isWatchLaterLoading(false);
+    }
+  }
+
+  Future<void> likeMovie(int id, String aliasType) async {
+    try {
+      await _homeService.likeItem(id, aliasType);
+      await fetchMovieDetails(id, aliasType);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update like: $e', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
+  Future<void> dislikeMovie(int id, String aliasType) async {
+    try {
+      await _homeService.dislikeContent(id, aliasType);
+      await fetchMovieDetails(id, aliasType);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update dislike: $e', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
+  Future<void> likeSeries(int id, String aliasType) async {
+    try {
+      await _homeService.likeItem(id, aliasType);
+      await fetchSeriesDetails(id, aliasType);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update like: $e', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
+  Future<void> dislikeSeries(int id, String aliasType) async {
+    try {
+      await _homeService.dislikeContent(id, aliasType);
+      await fetchSeriesDetails(id, aliasType);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to update dislike: $e', backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
+
+  Future<void> fetchGenres() async {
+    try {
+      isGenresLoading(true);
+      genresErrorMessage('');
+      final genres = await _homeService.getGenres();
+      final capitalizedGenres = genres.map((genre) => genre.capitalizeFirst!).toList();
+      genre.assignAll(capitalizedGenres);
+    } catch (e) {
+      genresErrorMessage('Failed to load genres: $e');
+    } finally {
+      isGenresLoading(false);
+    }
+  }
+
   Future<void> fetchAllMovies() async {
     try {
       isAllMoviesLoading(true);
       allMoviesErrorMessage('');
       final response = await _homeService.getAllMovies();
       allMoviesResponse.value = response;
-      final movieResponse = allMoviesResponse.value;
-      if (movieResponse != null) {
-        final types = <String>[];
-        if (movieResponse.popular.isNotEmpty) types.add('popular');
-        if (movieResponse.watchLater.isNotEmpty) types.add('watch_later');
-        if (movieResponse.previousYear.isNotEmpty) types.add('previous_year');
-        if (movieResponse.animation.isNotEmpty) types.add('animation');
-        if (movieResponse.action.isNotEmpty) types.add('action');
-        if (movieResponse.drama.isNotEmpty) types.add('drama');
-        if (movieResponse.horror.isNotEmpty) types.add('horror');
-        if (movieResponse.scienceFiction.isNotEmpty)
-          types.add('science-fiction');
-        if (movieResponse.mystery.isNotEmpty) types.add('mystery');
-        movieTypes.assignAll(types);
-      }
+      _updateMovieTypes(response);
     } catch (e) {
       allMoviesErrorMessage('Failed to load all movies: $e');
     } finally {
@@ -426,26 +381,27 @@ await fetchMovieDetails(id, aliasType);
       allMoviesErrorMessage('');
       final response = await _homeService.getMoviesByGenre(genreSlug);
       allMoviesResponse.value = response;
-      final movieResponse = allMoviesResponse.value;
-      if (movieResponse != null) {
-        final types = <String>[];
-        if (movieResponse.popular.isNotEmpty) types.add('popular');
-        if (movieResponse.watchLater.isNotEmpty) types.add('watch_later');
-        if (movieResponse.previousYear.isNotEmpty) types.add('previous_year');
-        if (movieResponse.animation.isNotEmpty) types.add('animation');
-        if (movieResponse.action.isNotEmpty) types.add('action');
-        if (movieResponse.drama.isNotEmpty) types.add('drama');
-        if (movieResponse.horror.isNotEmpty) types.add('horror');
-        if (movieResponse.scienceFiction.isNotEmpty)
-          types.add('science-fiction');
-        if (movieResponse.mystery.isNotEmpty) types.add('mystery');
-        movieTypes.assignAll(types);
-      }
+      _updateMovieTypes(response);
     } catch (e) {
       allMoviesErrorMessage('Failed to load movies by genre: $e');
-
     } finally {
       isAllMoviesLoading(false);
+    }
+  }
+
+  void _updateMovieTypes(MovieResponse? response) {
+    if (response != null) {
+      final types = <String>[];
+      if (response.popular.isNotEmpty) types.add('popular');
+      if (response.watchLater.isNotEmpty) types.add('watch_later');
+      if (response.previousYear.isNotEmpty) types.add('previous_year');
+      if (response.animation.isNotEmpty) types.add('animation');
+      if (response.action.isNotEmpty) types.add('action');
+      if (response.drama.isNotEmpty) types.add('drama');
+      if (response.horror.isNotEmpty) types.add('horror');
+      if (response.scienceFiction.isNotEmpty) types.add('science-fiction');
+      if (response.mystery.isNotEmpty) types.add('mystery');
+      movieTypes.assignAll(types);
     }
   }
 
@@ -455,21 +411,7 @@ await fetchMovieDetails(id, aliasType);
       allSeriesErrorMessage('');
       final response = await _homeService.getAllSeries();
       allSeriesResponse.value = response;
-      final seriesResponse = allSeriesResponse.value;
-      if (seriesResponse != null) {
-        final types = <String>[];
-        if (seriesResponse.popular.isNotEmpty) types.add('popular');
-        if (seriesResponse.watchLater.isNotEmpty) types.add('watch_later');
-        if (seriesResponse.previousYear.isNotEmpty) types.add('previous_year');
-        if (seriesResponse.animation.isNotEmpty) types.add('animation');
-        if (seriesResponse.action.isNotEmpty) types.add('action');
-        if (seriesResponse.drama.isNotEmpty) types.add('drama');
-        if (seriesResponse.horror.isNotEmpty) types.add('horror');
-        if (seriesResponse.scienceFiction.isNotEmpty)
-          types.add('science-fiction');
-        if (seriesResponse.mystery.isNotEmpty) types.add('mystery');
-        seriesTypes.assignAll(types);
-      }
+      _updateSeriesTypes(response);
     } catch (e) {
       allSeriesErrorMessage('Failed to load all series: $e');
     } finally {
@@ -483,26 +425,27 @@ await fetchMovieDetails(id, aliasType);
       allSeriesErrorMessage('');
       final response = await _homeService.getSeriesByGenre(genreSlug);
       allSeriesResponse.value = response;
-      final seriesResponse = allSeriesResponse.value;
-      if (seriesResponse != null) {
-        final types = <String>[];
-        if (seriesResponse.popular.isNotEmpty) types.add('popular');
-        if (seriesResponse.watchLater.isNotEmpty) types.add('watch_later');
-        if (seriesResponse.previousYear.isNotEmpty) types.add('previous_year');
-        if (seriesResponse.animation.isNotEmpty) types.add('animation');
-        if (seriesResponse.action.isNotEmpty) types.add('action');
-        if (seriesResponse.drama.isNotEmpty) types.add('drama');
-        if (seriesResponse.horror.isNotEmpty) types.add('horror');
-        if (seriesResponse.scienceFiction.isNotEmpty)
-          types.add('science-fiction');
-        if (seriesResponse.mystery.isNotEmpty) types.add('mystery');
-        seriesTypes.assignAll(types);
-      }
+      _updateSeriesTypes(response);
     } catch (e) {
       allSeriesErrorMessage('Failed to load series by genre: $e');
-
     } finally {
       isAllSeriesLoading(false);
+    }
+  }
+
+  void _updateSeriesTypes(SeriesResponse? response) {
+    if (response != null) {
+      final types = <String>[];
+      if (response.popular.isNotEmpty) types.add('popular');
+      if (response.watchLater.isNotEmpty) types.add('watch_later');
+      if (response.previousYear.isNotEmpty) types.add('previous_year');
+      if (response.animation.isNotEmpty) types.add('animation');
+      if (response.action.isNotEmpty) types.add('action');
+      if (response.drama.isNotEmpty) types.add('drama');
+      if (response.horror.isNotEmpty) types.add('horror');
+      if (response.scienceFiction.isNotEmpty) types.add('science-fiction');
+      if (response.mystery.isNotEmpty) types.add('mystery');
+      seriesTypes.assignAll(types);
     }
   }
 
@@ -512,12 +455,7 @@ await fetchMovieDetails(id, aliasType);
       allContentErrorMessage('');
       final response = await _homeService.getAllContent();
       allContentResponse.value = response;
-      popularItems.assignAll(
-        _alternateMoviesAndSeries(
-          response.movies.popular,
-          response.series.popular,
-        ),
-      );
+      popularItems.assignAll(_alternateMoviesAndSeries(response.movies.popular, response.series.popular));
       bannerMovies.assignAll({
         for (var item in popularItems)
           if (item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty)
@@ -526,21 +464,15 @@ await fetchMovieDetails(id, aliasType);
                 : <String>[],
       });
     } catch (e) {
-
       allContentErrorMessage('Failed to load all content: $e');
     } finally {
       isAllContentLoading(false);
     }
   }
 
-  List<dynamic> _alternateMoviesAndSeries(
-    List<dynamic> movies,
-    List<dynamic> series,
-  ) {
+  List<dynamic> _alternateMoviesAndSeries(List<dynamic> movies, List<dynamic> series) {
     final mixed = <dynamic>[];
-    final maxLength = movies.length > series.length
-        ? movies.length
-        : series.length;
+    final maxLength = movies.length > series.length ? movies.length : series.length;
     for (int i = 0; i < maxLength; i++) {
       if (i < movies.length) mixed.add(movies[i]);
       if (i < series.length) mixed.add(series[i]);

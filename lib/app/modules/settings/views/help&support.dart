@@ -40,59 +40,39 @@ class HelpAndSupport extends StatelessWidget {
                       SizedBox(height: 8.h),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        child: Text(
-                          "Help & Support",
-                          style: AppTextStyles.montserratRegular
-                              .copyWith(fontSize: 20.sp),
-                        ),
+                        child: Text('help_support'.tr, style: AppTextStyles.montserratRegular.copyWith(fontSize: 20.sp)),
                       ),
                       SizedBox(height: 24.h),
                       Container(
                         padding: EdgeInsets.all(15.w),
                         margin: EdgeInsets.all(10.w),
-                        decoration: BoxDecoration(
-                          color: AppColor.charcoal,
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
+                        decoration: BoxDecoration(color: AppColor.charcoal, borderRadius: BorderRadius.circular(12.r)),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "If you are experiencing any issues, please let us know. We will try to solve them as soon as possible.",
-                              style: AppTextStyles.montserratMedium
-                                  .copyWith(color: Colors.white70),
-                              textAlign: TextAlign.start,
-                            ),
+                            Text('help_support_desc'.tr, style: AppTextStyles.montserratMedium.copyWith(color: Colors.white70), textAlign: TextAlign.start),
                             SizedBox(height: 24.h),
-                            Text(
-                              "Email",
-                              style: AppTextStyles.montserratRegular
-                                  .copyWith(fontSize: 16.sp),
-                            ),
-                            SizedBox(height: 5.h,),
+                            Text('email_label'.tr, style: AppTextStyles.montserratRegular.copyWith(fontSize: 16.sp)),
+                            SizedBox(height: 5.h),
                             InputTextWidget(
                               controller: titleController,
                               borderColor: AppColor.background,
                               backgroundColor: AppColor.darkGray3,
                               hintTextColor: AppColor.white,
-                              hintText: 'Enter your email',
+                              hintText: 'enter_email'.tr,
                               textColor: AppColor.white,
                               height: 30.h,
                               width: double.infinity,
                               onChanged: (val) {},
                             ),
                             SizedBox(height: 12.h),
-                            Text(
-                              "Explain the problem",
-                              style: AppTextStyles.montserratRegular
-                                  .copyWith(fontSize: 16.sp),
-                            ),
+                            Text('problem_label'.tr, style: AppTextStyles.montserratRegular.copyWith(fontSize: 16.sp)),
                             SizedBox(height: 5.h),
                             InputTextWidget(
                               controller: descriptionController,
                               borderColor: AppColor.background,
                               backgroundColor: AppColor.darkGray3,
-                              hintText: 'Type your query here',
+                              hintText: 'type_query'.tr,
                               hintTextColor: AppColor.white,
                               textColor: AppColor.white,
                               height: 140.h,
@@ -107,23 +87,12 @@ class HelpAndSupport extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         child: Obx(() => CustomButton(
-                          onPress: controller.isLoading.value
-                              ? null
-                              : () async {
-                            await controller.submitHelpSupport(
-                              email: controller.email.value,
-                              description: descriptionController.text,
-                            );
+                          onPress: controller.isLoading.value ? null : () async {
+                            await controller.submitHelpSupport(email: controller.email.value, description: descriptionController.text);
                           },
-                          title: controller.isLoading.value
-                              ? 'Submitting...'
-                              : 'Submit',
+                          title: controller.isLoading.value ? 'submitting'.tr : 'submit'.tr,
                           textColor: Colors.black,
-                          gradient: LinearGradient(
-                            colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          gradient: LinearGradient(colors: [AppColor.vividAmber, AppColor.sunnyYellow], begin: Alignment.topLeft, end: Alignment.bottomRight),
                           width: double.infinity,
                           height: 30.h,
                           fontSize: 14.sp,

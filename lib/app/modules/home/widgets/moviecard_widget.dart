@@ -249,7 +249,7 @@ class _MovieCardWidgetState extends State<MovieCardWidget> {
                         ),
                         SizedBox(width: 5.w),
                         Text(
-                          'Remind Me',
+                          'remind_me'.tr,
                           style: AppTextStyles.montserratBold.copyWith(
                             color: widget.isNotify ? AppColor.black : AppColor.black,
                             fontSize: 12.sp,

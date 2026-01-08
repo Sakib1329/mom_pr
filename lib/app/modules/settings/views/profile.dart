@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:Nuweli/app/modules/auth/views/login.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
 import '../../../constants/appconstant.dart';
@@ -21,7 +21,7 @@ class ProfilePage extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 10.h, 0, 16.h),
       child: Text(
-        title,
+        title.tr,
         style: AppTextStyles.montserratMedium.copyWith(color: AppColor.vividAmber),
       ),
     );
@@ -46,7 +46,7 @@ class ProfilePage extends StatelessWidget {
           fontSize: 14.sp,
         ),
         decoration: InputDecoration(
-          hintText: hintText,
+          hintText: hintText.tr,
           hintStyle: AppTextStyles.montserratRegular
               .copyWith(color: Colors.grey[400], fontSize: 12.sp),
           filled: true,
@@ -62,7 +62,7 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildGenderDropdown() {
-    final options = ['Male', 'Female',];
+    final options = ['male'.tr, 'female'.tr];
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       child: Obx(() => DropdownButtonFormField<String>(
@@ -81,7 +81,7 @@ class ProfilePage extends StatelessWidget {
           ),
           contentPadding:
           EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          hintText: 'Select your gender',
+          hintText: 'select_gender'.tr,
           hintStyle: AppTextStyles.montserratRegular
               .copyWith(color: Colors.white, fontSize: 12.sp),
         ),
@@ -113,7 +113,7 @@ class ProfilePage extends StatelessWidget {
         decoration: InputDecoration(
           hintText: controller.dateOfBirth.value.isNotEmpty
               ? controller.dateOfBirth.value
-              : 'Select date of birth',
+              : 'select_dob'.tr,
           hintStyle: AppTextStyles.montserratRegular
               .copyWith(color: Colors.grey[400], fontSize: 12.sp),
           filled: true,
@@ -168,7 +168,7 @@ class ProfilePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
+          Text(label.tr,
               style: AppTextStyles.montserratMedium
                   .copyWith(color: Colors.white70, fontSize: 12.sp)),
           Flexible(
@@ -211,7 +211,7 @@ class ProfilePage extends StatelessWidget {
                     Obx(() {
                       final url = AppConstants.baseUrl;
                       final profileImage = controller.profileImage.value;
-                      final localFile = controller.pickedImage.value ?? bs.pickedImage.value; // ✅ Use synced image
+                      final localFile = controller.pickedImage.value ?? bs.pickedImage.value;
 
                       final double size = 130.w;
 
@@ -272,11 +272,11 @@ class ProfilePage extends StatelessWidget {
                   ],
                 ),
               ),
-              Text('My Profile',
+              Text('my_profile'.tr,
                   style: AppTextStyles.montserratMedium
                       .copyWith(color: Colors.white, fontSize: 18.sp)),
               SizedBox(height: 5.h),
-              Text('Customize your settings',
+              Text('customize_settings'.tr,
                   style: AppTextStyles.montserratRegular.copyWith(
                       color: AppColor.translucentWhite, fontSize: 16.sp)),
               SizedBox(height: 12.h),
@@ -291,8 +291,8 @@ class ProfilePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('General Information'),
-                    Text('First Name',
+                    _buildSectionTitle('general_info'),
+                    Text('first_name'.tr,
                         style: AppTextStyles.montserratMedium
                             .copyWith(color: Colors.white70, fontSize: 14.sp)),
                     SizedBox(height: 8.h),
@@ -301,9 +301,9 @@ class ProfilePage extends StatelessWidget {
                       reactiveValue: controller.firstName,
                       hintText: controller.firstName.value.isNotEmpty
                           ? controller.firstName.value
-                          : 'Enter your first name',
+                          : 'enter_first_name',
                     ),
-                    Text('Last Name',
+                    Text('last_name'.tr,
                         style: AppTextStyles.montserratMedium
                             .copyWith(color: Colors.white70, fontSize: 14.sp)),
                     SizedBox(height: 8.h),
@@ -312,21 +312,21 @@ class ProfilePage extends StatelessWidget {
                       reactiveValue: controller.lastName,
                       hintText: controller.lastName.value.isNotEmpty
                           ? controller.lastName.value
-                          : 'Enter your last name',
+                          : 'enter_last_name',
                     ),
-                    Text('Gender',
+                    Text('gender'.tr,
                         style: AppTextStyles.montserratMedium
                             .copyWith(color: Colors.white70, fontSize: 14.sp)),
                     SizedBox(height: 8.h),
                     _buildGenderDropdown(),
-                    Text('Date of Birth',
+                    Text('date_of_birth'.tr,
                         style: AppTextStyles.montserratMedium
                             .copyWith(color: Colors.white70, fontSize: 14.sp)),
                     SizedBox(height: 8.h),
                     _buildDateField(),
-                    _buildSectionTitle('Contact Information'),
+                    _buildSectionTitle('contact_info'),
 
-                    Text('Phone',
+                    Text('phone'.tr,
                         style: AppTextStyles.montserratMedium
                             .copyWith(color: Colors.white70, fontSize: 14.sp)),
                     SizedBox(height: 8.h),
@@ -335,14 +335,14 @@ class ProfilePage extends StatelessWidget {
                       reactiveValue: controller.phone,
                       hintText: controller.phone.value.isNotEmpty
                           ? controller.phone.value
-                          : 'Enter your phone number',
+                          : 'enter_phone',
                     ),
 
-                    _buildInfoRow('Email address', controller.email.value),
+                    _buildInfoRow('email_address', controller.email.value),
                     SizedBox(height: 20.h,),
                     CustomButton(
                       loading: controller.isLoading.value,
-                      title: 'Save Changes',
+                      title: 'save_changes'.tr,
                       onPress: () async {
                         await controller.updateProfileData();
                       },
@@ -370,9 +370,9 @@ class ProfilePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle('Delete Account'),
+                    _buildSectionTitle('delete_account'),
                     Text(
-                      'Type Delete to confirm',
+                      'type_delete_confirm'.tr,
                       style: AppTextStyles.montserratMedium
                           .copyWith(color: AppColor.darkGray3, fontSize: 14.sp),
                     ),
@@ -380,10 +380,10 @@ class ProfilePage extends StatelessWidget {
                     _buildTextField(
                       controller: controller.deleteConfirmController,
                       reactiveValue: controller.deleteConfirmText,
-                      hintText: 'Enter Text',
+                      hintText: 'enter_text',
                     ),
                     Obx(() {
-                      if (controller.deleteConfirmText.value == 'Delete') {
+                      if (controller.deleteConfirmText.value.toLowerCase() == 'delete') {
                         return SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -397,7 +397,7 @@ class ProfilePage extends StatelessWidget {
                               await controller.deleteProfileData();
                             },
                             child: Text(
-                              'Delete Account',
+                              'delete_account_btn'.tr,
                               style: AppTextStyles.montserratSemiBold.copyWith(
                                   color: Colors.white, fontSize: 14.sp),
                             ),

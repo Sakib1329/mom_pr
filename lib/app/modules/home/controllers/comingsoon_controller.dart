@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import '../../../res/colors/color.dart';
 import '../../../res/fonts/fonts.dart';
 import '../models/comingsoon_model.dart';
@@ -19,7 +19,7 @@ class ComingSoonController extends GetxController {
 
   Future<void> fetchItems() async {
     try {
-      isLoading.value = false;
+      isLoading.value = true;
       error.value = '';
       final fetchedItems = await _service.fetchComingSoon();
       items.assignAll(fetchedItems);
@@ -30,40 +30,27 @@ class ComingSoonController extends GetxController {
     }
   }
 
-  /// 👉 Remind Me (POST)
   Future<void> remindMe(String id) async {
-
     final success = await _service.remindMe(int.parse(id));
-fetchItems();
+    await fetchItems();
+
     if (success) {
       Get.snackbar(
         'Success',
-        'Movie added to reminders!',
+        'reminder_added'.tr,
         snackPosition: SnackPosition.TOP,
         backgroundColor: AppColor.vividAmber,
-        titleText: Text(
-          'Success',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          'Movie added to reminders!',
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
+        titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        messageText: Text('reminder_added'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
       );
     } else {
       Get.snackbar(
         'Failed',
-        'Couldn\'t add to reminders!',
+        'reminder_failed'.tr,
         snackPosition: SnackPosition.TOP,
         backgroundColor: AppColor.vividAmber,
-        titleText: Text(
-          'Failed',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          'Couldn\'t add to reminders!',
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
+        titleText: Text('Failed', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        messageText: Text('reminder_failed'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
       );
     }
   }

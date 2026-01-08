@@ -1,10 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:Nuweli/app/modules/onboard/controllers/onboard_controller.dart';
 
 import '../../../res/assets/imageassets.dart';
 import '../../../res/colors/color.dart';
@@ -23,23 +21,22 @@ class Verifiedpage extends StatelessWidget {
       });
     });
     return WillPopScope(
-      onWillPop: ()async=>false,
+      onWillPop: () async => false,
       child: Scaffold(
         body: Padding(
-          padding:  EdgeInsets.symmetric(horizontal: 10.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
                 ImageAssets.svg18,
-
                 color: AppColor.sunnyYellow,
               ),
               Text(
-                page=="signup"
-                ?'Sign up\nsuccessfully'
-                :"Password changed Successfully",
+                page == "signup"
+                    ? 'signup_success'.tr
+                    : 'password_changed_success'.tr,
                 style: AppTextStyles.montserratRegular.copyWith(
                   color: Colors.white,
                   fontSize: 30.sp,

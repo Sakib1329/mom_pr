@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/Get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:Nuweli/app/res/assets/imageassets.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:Nuweli/app/res/fonts/fonts.dart';
-import '../../../res/assets/imageassets.dart';
 
 class ProfileDropdown extends StatelessWidget {
   final String userName;
@@ -28,7 +29,7 @@ class ProfileDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<int>(
-      color: AppColor.charcoal, // Dark background like screenshot
+      color: AppColor.charcoal,
       offset: const Offset(0, 50),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (context) => [
@@ -40,69 +41,38 @@ class ProfileDropdown extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundImage: _getProfileImage(), // Use helper method for dropdown avatar
-                  backgroundColor: AppColor.darkGray2, // Fallback background color
+                  backgroundImage: _getProfileImage(),
+                  backgroundColor: AppColor.darkGray2,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  userName,
-                  style: AppTextStyles.montserratRegular.copyWith(
-                    color: AppColor.translucentWhite,
-                  ),
-                ),
+                Text(userName, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.translucentWhite)),
                 const Divider(color: AppColor.darkGray2),
               ],
             ),
           ),
         ),
-        PopupMenuItem(
-          onTap: onProfileTap,
-          child: _menuItem(ImageAssets.svg27, "Profile", 20),
-        ),
-        PopupMenuItem(
-          onTap: onMyListTap,
-          child: _menuItem(ImageAssets.svg28, "My List", 20),
-        ),
-        PopupMenuItem(
-          onTap: onWatchHistoryTap,
-          child: _menuItem(ImageAssets.svg29, "Watch History", 20),
-        ),
-        PopupMenuItem(
-          onTap: oncollectiontap,
-          child: _menuItem(ImageAssets.svg31, "  Collections", 20),
-        ),
-        const PopupMenuDivider(
-          color: AppColor.darkGray2,
-        ),
-        PopupMenuItem(
-          onTap: onUnsubscribeTap,
-          child: _menuItem(ImageAssets.svg26, "Subscription", 18, isDestructive: true),
-        ),
+        PopupMenuItem(onTap: onProfileTap, child: _menuItem(ImageAssets.svg27, 'profile'.tr, 20)),
+        PopupMenuItem(onTap: onMyListTap, child: _menuItem(ImageAssets.svg28, 'my_list'.tr, 20)),
+        PopupMenuItem(onTap: onWatchHistoryTap, child: _menuItem(ImageAssets.svg29, 'watch_history'.tr, 20)),
+        PopupMenuItem(onTap: oncollectiontap, child: _menuItem(ImageAssets.svg31, 'collections'.tr, 20)),
+        const PopupMenuDivider(color: AppColor.darkGray2),
+        PopupMenuItem(onTap: onUnsubscribeTap, child: _menuItem(ImageAssets.svg26, 'subscribe'.tr, 18, isDestructive: true)),
       ],
       child: ClipRRect(
         borderRadius: BorderRadius.circular(200.r),
-        child: Image(
-          image: _getProfileImage(), // ✅ Use helper method for button image
-          width: 32.w,
-          height: 30.h,
-          fit: BoxFit.cover,
-        ),
+        child: Image(image: _getProfileImage(), width: 32.w, height: 30.h, fit: BoxFit.cover),
       ),
     );
   }
 
-  /// Helper method to determine the correct image source
   ImageProvider _getProfileImage() {
     if (userImageUrl.isNotEmpty) {
-      // Check if userImageUrl is a network URL
       if (userImageUrl.startsWith('http') || userImageUrl.startsWith('https')) {
         return NetworkImage(userImageUrl);
       } else {
-        // Assume it's a local asset path
         return AssetImage(userImageUrl);
       }
     }
-    // Fallback to default person image if userImageUrl is empty
     return AssetImage(ImageAssets.person);
   }
 
@@ -111,12 +81,7 @@ class ProfileDropdown extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Row(
         children: [
-          SvgPicture.asset(
-            icon,
-            color: isDestructive ? AppColor.vividAmber : Colors.white,
-            height: height.sp,
-            width: 30.w,
-          ),
+          SvgPicture.asset(icon, color: isDestructive ? AppColor.vividAmber : Colors.white, height: height.sp, width: 30.w),
           const SizedBox(width: 12),
           Text(
             title,

@@ -28,10 +28,10 @@ class CategoryHome extends StatelessWidget {
         );
       }
       if (homeController.allContentResponse.value == null) {
-        return const Center(
+        return Center(
           child: Text(
-            'No content available',
-            style: TextStyle(color: Colors.white),
+            'no_content_available'.tr,
+            style: const TextStyle(color: Colors.white),
           ),
         );
       }
@@ -40,7 +40,6 @@ class CategoryHome extends StatelessWidget {
       final movies = data.movies;
       final series = data.series;
 
-      // Use popularItems instead of mixedPopular
       final bannerMovies = <String, List<String>>{};
       for (var item in homeController.popularItems) {
         if (item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty) {
@@ -51,12 +50,8 @@ class CategoryHome extends StatelessWidget {
         }
       }
 
-      // Map popularItems to previewItems (limit to 8)
       final List<Map<String, dynamic>> previewItems = homeController.popularItems
-          .where(
-            (item) =>
-        item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty,
-      )
+          .where((item) => item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty)
           .take(8)
           .map((item) => {
         'id': item.id,
@@ -70,30 +65,20 @@ class CategoryHome extends StatelessWidget {
         final categoryName = _getCategoryTitle(category);
         final movieCategory = _getCategoryField(movies, category);
         final seriesCategory = _getCategoryField(series, category);
-        final mixedCategory = _alternateMoviesAndSeries(
-          movieCategory,
-          seriesCategory,
-        );
+        final mixedCategory = _alternateMoviesAndSeries(movieCategory, seriesCategory);
         final categoryList = mixedCategory
-            .where(
-              (item) =>
-          item.postersUrl.isNotEmpty &&
-              item.postersUrl.first.isNotEmpty,
-        )
-            .map(
-              (item) => {
-            'id': item.id,
-            'alias': item.aliasType,
-            'poster': item.firstPosterUrl,
-          },
-        )
+            .where((item) => item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty)
+            .map((item) => {
+          'id': item.id,
+          'alias': item.aliasType,
+          'poster': item.firstPosterUrl,
+        })
             .toList();
         if (categoryList.isNotEmpty) {
           categoryImages[categoryName] = categoryList;
         }
       }
 
-      // Fallback for previewItems when empty
       final List<Map<String, dynamic>> finalPreviewItems = previewItems.isNotEmpty
           ? previewItems
           : [
@@ -111,7 +96,7 @@ class CategoryHome extends StatelessWidget {
 
       return CategoryHomeWidget(
         bannerMovies: bannerMovies,
-        previewItems: finalPreviewItems, // Updated to use finalPreviewItems
+        previewItems: finalPreviewItems,
         categoryImages: categoryImages,
         homeController: homeController,
       );
@@ -145,14 +130,9 @@ class CategoryHome extends StatelessWidget {
     }
   }
 
-  List<dynamic> _alternateMoviesAndSeries(
-      List<dynamic> movies,
-      List<dynamic> series,
-      ) {
+  List<dynamic> _alternateMoviesAndSeries(List<dynamic> movies, List<dynamic> series) {
     final mixed = <dynamic>[];
-    final maxLength = movies.length > series.length
-        ? movies.length
-        : series.length;
+    final maxLength = movies.length > series.length ? movies.length : series.length;
     for (int i = 0; i < maxLength; i++) {
       if (i < movies.length) mixed.add(movies[i]);
       if (i < series.length) mixed.add(series[i]);
@@ -162,18 +142,17 @@ class CategoryHome extends StatelessWidget {
 
   String _getCategoryTitle(String category) {
     final titleMap = {
-      'popular': 'Trending This Week',
-      'watch_later': 'Your Watchlist',
-      'watch_history': 'Watch History',
-      'previous_year': 'Last Year’s Favorites',
-      'animation': 'Animated Classics',
-      'action': 'Action Thrillers',
-      'drama': 'Compelling Dramas',
-      'horror': 'Horror Highlights',
-      'science_fiction': 'Sci-Fi Adventures',
-      'mystery': 'Mystery & Suspense',
+      'popular': 'trending_this_week'.tr,
+      'watch_later': 'your_watchlist'.tr,
+      'watch_history': 'watch_history'.tr,
+      'previous_year': 'last_years_favorites'.tr,
+      'animation': 'animated_classics'.tr,
+      'action': 'action_thrillers'.tr,
+      'drama': 'compelling_dramas'.tr,
+      'horror': 'horror_highlights'.tr,
+      'science_fiction': 'sci_fi_adventures'.tr,
+      'mystery': 'mystery_suspense'.tr,
     };
-    return titleMap[category] ??
-        category.replaceAll('_', ' ').capitalizeFirst! + ' Movies & Series';
+    return titleMap[category] ?? '${category.replaceAll('_', ' ').capitalizeFirst} Movies & Series';
   }
 }

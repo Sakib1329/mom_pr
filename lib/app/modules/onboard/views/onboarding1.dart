@@ -44,7 +44,7 @@ class Onboard1 extends StatelessWidget {
                   alignment: Alignment.topLeft,
                   child: SvgPicture.asset(
                     'assets/icons/svg1.svg',
-                    height: 20.h, // smaller but same UI scale
+                    height: 20.h,
                     width: 20.w,
                   ),
                 ),
@@ -53,9 +53,9 @@ class Onboard1 extends StatelessWidget {
 
                 // Title
                 Text(
-                  "Unlimited\n movies,TV\n shows & more",
+                  'unlimited_movies'.tr,
                   style: AppTextStyles.montserratRegular.copyWith(
-                    fontSize: 28.sp, // reduced size
+                    fontSize: 28.sp,
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -65,9 +65,9 @@ class Onboard1 extends StatelessWidget {
 
                 // Subtitle
                 Text(
-                  "Watch anywhere.\n Cancel anytime.",
+                  'watch_anywhere'.tr,
                   style: AppTextStyles.montserratRegular.copyWith(
-                    fontSize: 18.sp, // reduced size
+                    fontSize: 18.sp,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -76,9 +76,9 @@ class Onboard1 extends StatelessWidget {
 
                 // Button
                 CustomButton(
-                  onPress: () async => Get.to(Login(), transition: Transition.rightToLeft),
-                  title: "Get Started",
-                  height: 30.h, // smaller button
+                  onPress: () async => Get.to(() => Login(), transition: Transition.rightToLeft),
+                  title: 'get_started'.tr,
+                  height: 30.h,
                   fontFamily: 'Sans',
                   fontWeight: FontWeight.bold,
                   textColor: AppColor.background,

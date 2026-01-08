@@ -3,11 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:Nuweli/app/res/assets/imageassets.dart';
-
-import 'package:Nuweli/app/res/fonts/fonts.dart';
+import '../../../res/fonts/fonts.dart';
 import '../../home/controllers/home_controller.dart';
 import '../../home/models/movie_model.dart';
-
 import '../../home/models/series_model.dart';
 
 class Collections extends StatelessWidget {
@@ -41,7 +39,7 @@ class Collections extends StatelessWidget {
         if (homeController.collectionitems.isEmpty) {
           return Center(
             child: Text(
-              'No items in Premium collection list',
+              'no_items_premium'.tr,
               style: TextStyle(color: Colors.white, fontSize: 16.sp),
             ),
           );
@@ -55,9 +53,9 @@ class Collections extends StatelessWidget {
                 Row(
                   children: [
                     SvgPicture.asset(ImageAssets.svg26),
-                    SizedBox(width: 5.w,),
+                    SizedBox(width: 5.w),
                     Text(
-                      'Premium Collection' ,
+                      'premium_collection'.tr,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18.sp,
@@ -84,15 +82,11 @@ class Collections extends StatelessWidget {
                     String aliasType = '';
 
                     if (item is Movie) {
-                      imageUrl = item.postersUrl.isNotEmpty
-                          ? item.postersUrl.first
-                          : '';
+                      imageUrl = item.postersUrl.isNotEmpty ? item.postersUrl.first : '';
                       title = item.title;
                       aliasType = 'movie';
                     } else if (item is Series) {
-                      imageUrl = item.postersUrl.isNotEmpty
-                          ? item.postersUrl.first
-                          : '';
+                      imageUrl = item.postersUrl.isNotEmpty ? item.postersUrl.first : '';
                       title = item.name;
                       aliasType = 'series';
                     }
@@ -126,21 +120,13 @@ class Collections extends StatelessWidget {
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color: Colors.grey[800],
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.grey[400],
-                                      size: 42.sp,
-                                    ),
+                                    child: Icon(Icons.image_not_supported, color: Colors.grey[400], size: 42.sp),
                                   );
                                 },
                               )
                                   : Container(
                                 color: Colors.grey[800],
-                                child: Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.grey[400],
-                                  size: 42.sp,
-                                ),
+                                child: Icon(Icons.image_not_supported, color: Colors.grey[400], size: 42.sp),
                               ),
                               Positioned(
                                 bottom: 0,
@@ -152,19 +138,13 @@ class Collections extends StatelessWidget {
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withOpacity(0.8),
-                                      ],
+                                      colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
                                     ),
                                   ),
                                   child: Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w,
-                                        vertical: 10.h,
-                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
                                       child: Text(
                                         title,
                                         style: AppTextStyles.montserratMedium.copyWith(

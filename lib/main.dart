@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Nuweli/app/constants/apptranslations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'app/constants/app_lifecycle.dart';
 import 'app/modules/onboard/views/splash.dart';
 import 'app/bindings/initialbindings.dart';
 import 'app/res/colors/color.dart';
@@ -62,7 +64,7 @@ Future<void> main() async {
       showRichNotification(message.data, isBackground: false);
     }
   });
-
+  await Get.putAsync(() async => AppLifecycleService());
   runApp(const MyApp());
 }
 
@@ -75,17 +77,28 @@ class MyApp extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: (context, child) => GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: "Nuweli",
-        home: const SplashView(),
-        initialBinding: InitialBinding(),
-        theme: ThemeData(
-          scaffoldBackgroundColor: AppColor.background,
-          appBarTheme: const AppBarTheme(
-            elevation: 0,
-            backgroundColor: AppColor.background,
-            scrolledUnderElevation: 0,
+      builder: (context, child) => GestureDetector(
+        onTap: (){
+
+          FocusManager.instance.primaryFocus?.unfocus();
+
+        },
+
+        child: GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          translations: AppTranslations(),
+          title: "Nuweli",
+          home: const SplashView(),
+          initialBinding: InitialBinding(),
+          locale: const Locale('en', 'US'),
+          fallbackLocale: const Locale('en', 'US'),
+          theme: ThemeData(
+            scaffoldBackgroundColor: AppColor.background,
+            appBarTheme: const AppBarTheme(
+              elevation: 0,
+              backgroundColor: AppColor.background,
+              scrolledUnderElevation: 0,
+            ),
           ),
         ),
       ),

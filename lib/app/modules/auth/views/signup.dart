@@ -6,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:Nuweli/app/modules/auth/controllers/authcontroller.dart';
 import 'package:Nuweli/app/modules/auth/views/login.dart';
-import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
 import 'package:Nuweli/app/modules/settings/controllers/settingcontroller.dart';
 import 'package:Nuweli/app/modules/settings/views/termsandcondition.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
@@ -14,13 +13,12 @@ import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../../../res/assets/imageassets.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/input_text_widget.dart';
-import 'otp.dart';
 
 class Signup extends StatelessWidget {
   Signup({super.key});
 
   final Authcontroller controller = Get.find<Authcontroller>();
-  final Settingcontroller settingcontroller=   Get.put(Settingcontroller());
+  final Settingcontroller settingcontroller = Get.put(Settingcontroller());
 
   void _showCountryPicker(BuildContext context) {
     showCountryPicker(
@@ -62,9 +60,33 @@ class Signup extends StatelessWidget {
     );
   }
 
+  Widget _buildStrengthIndicator(String text, bool isSatisfied) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Row(
+        children: [
+          Icon(
+            isSatisfied ? Icons.check_circle : Icons.radio_button_unchecked,
+            color: isSatisfied ? AppColor.vividAmber : Colors.grey,
+            size: 18.w,
+          ),
+          SizedBox(width: 10.w),
+          Text(
+            text,
+            style: AppTextStyles.montserratRegular.copyWith(
+              color: isSatisfied ? AppColor.vividAmber : Colors.white70,
+              fontSize: 11.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     controller.frompage.value = "signup";
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -81,9 +103,8 @@ class Signup extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: 6.h),
-            // Title
             Text(
-              'Create an account',
+              'create_account'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 25.sp,
@@ -91,9 +112,8 @@ class Signup extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 6.h),
-            // Subtitle
             Text(
-              '"Begin your journey to understanding dreams today."',
+              'signup_subtitle'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 12.sp,
@@ -101,6 +121,7 @@ class Signup extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20.h),
+
             // First & Last Name
             Row(
               children: [
@@ -109,7 +130,7 @@ class Signup extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'First name',
+                        'first_name'.tr,
                         style: AppTextStyles.montserratRegular.copyWith(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -118,7 +139,7 @@ class Signup extends StatelessWidget {
                       SizedBox(height: 6.h),
                       InputTextWidget(
                         controller: controller.firstnamecontroller,
-                        hintText: 'First name',
+                        hintText: 'first_name'.tr,
                         onChanged: (value) {},
                         backgroundColor: AppColor.customDarkGray2,
                         borderColor: const Color(0xFF404040),
@@ -136,7 +157,7 @@ class Signup extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Last name',
+                        'last_name'.tr,
                         style: AppTextStyles.montserratRegular.copyWith(
                           color: Colors.white,
                           fontSize: 12.sp,
@@ -145,7 +166,7 @@ class Signup extends StatelessWidget {
                       SizedBox(height: 6.h),
                       InputTextWidget(
                         controller: controller.lastnamecontroller,
-                        hintText: 'Last name',
+                        hintText: 'last_name'.tr,
                         onChanged: (value) {},
                         backgroundColor: AppColor.customDarkGray2,
                         borderColor: const Color(0xFF404040),
@@ -160,9 +181,10 @@ class Signup extends StatelessWidget {
               ],
             ),
             SizedBox(height: 14.h),
+
             // Email
             Text(
-              'Email',
+              'email'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 12.sp,
@@ -171,7 +193,7 @@ class Signup extends StatelessWidget {
             SizedBox(height: 6.h),
             InputTextWidget(
               controller: controller.emailController,
-              hintText: 'Email',
+              hintText: 'email'.tr,
               onChanged: (value) {},
               leading: true,
               leadingIcon: ImageAssets.svg13,
@@ -183,9 +205,10 @@ class Signup extends StatelessWidget {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
+
             // Password
             Text(
-              'Password',
+              'password'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 12.sp,
@@ -194,8 +217,10 @@ class Signup extends StatelessWidget {
             SizedBox(height: 6.h),
             InputTextWidget(
               controller: controller.passwordController,
-              hintText: 'Enter your password',
-              onChanged: (value) {},
+              hintText: 'enter_password'.tr,
+              onChanged: (value) {
+                controller.validatePassword(value);
+              },
               obscureText: true,
               passwordIcon: ImageAssets.obsecure,
               backgroundColor: AppColor.customDarkGray2,
@@ -205,10 +230,35 @@ class Signup extends StatelessWidget {
               borderRadius: 6.0,
               height: 40.0,
             ),
-            SizedBox(height: 14.h),
+
+            // Password Strength
+            Obx(() => Padding(
+              padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Password must contain:',
+                    style: AppTextStyles.montserratRegular.copyWith(
+                      color: Colors.white70,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildStrengthIndicator('At least 6 characters', controller.hasMinLength.value),
+                  _buildStrengthIndicator('One uppercase letter', controller.hasUppercase.value),
+                  _buildStrengthIndicator('One lowercase letter', controller.hasLowercase.value),
+                  _buildStrengthIndicator('One number', controller.hasDigit.value),
+                  _buildStrengthIndicator('One special character (!@#\$ etc.)', controller.hasSpecial.value),
+                ],
+              ),
+            )),
+
+            SizedBox(height: 4.h),
+
             // Confirm Password
             Text(
-              'Confirm password',
+              'confirm_password'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 12.sp,
@@ -217,8 +267,10 @@ class Signup extends StatelessWidget {
             SizedBox(height: 6.h),
             InputTextWidget(
               controller: controller.confirmpasswordController,
-              hintText: 'Confirm password',
-              onChanged: (value) {},
+              hintText: 'confirm_password'.tr,
+              onChanged: (value) {
+                controller.validatePassword(controller.passwordController.text);
+              },
               obscureText: true,
               backgroundColor: AppColor.customDarkGray2,
               borderColor: const Color(0xFF404040),
@@ -228,9 +280,10 @@ class Signup extends StatelessWidget {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
+
             // Country
             Text(
-              'Country',
+              'country'.tr,
               style: AppTextStyles.montserratRegular.copyWith(
                 color: Colors.white,
                 fontSize: 12.sp,
@@ -239,7 +292,7 @@ class Signup extends StatelessWidget {
             SizedBox(height: 6.h),
             InputTextWidget(
               controller: controller.countryController,
-              hintText: 'Select Country',
+              hintText: 'select_country'.tr,
               onChanged: (value) {},
               readOnly: true,
               onTap: () => _showCountryPicker(context),
@@ -253,6 +306,7 @@ class Signup extends StatelessWidget {
               height: 40.0,
             ),
             SizedBox(height: 14.h),
+
             // Terms & Conditions
             Obx(() => Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -281,23 +335,24 @@ class Signup extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: 'I agree to the ',
+                          text: 'terms_prefix'.tr,
                           style: AppTextStyles.montserratRegular.copyWith(
                             color: Colors.white,
                             fontSize: 12.sp,
                           ),
                         ),
                         TextSpan(
-                          text: 'Terms & conditions',
+                          text: 'terms_conditions'.tr,
                           style: AppTextStyles.montserratMedium.copyWith(
                             color: const Color(0xFFFFD700),
                             fontSize: 12.sp,
-                            decoration: TextDecoration.underline
+                            decoration: TextDecoration.underline,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap =()async{
-                            await settingcontroller.loadPrivacyPolicy();
-                            Get.to(Privacypolicy(),transition: Transition.rightToLeft);
-                          }
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              await settingcontroller.loadPrivacyPolicy();
+                              Get.to(Privacypolicy(), transition: Transition.rightToLeft);
+                            },
                         ),
                       ],
                     ),
@@ -306,39 +361,39 @@ class Signup extends StatelessWidget {
               ],
             )),
             SizedBox(height: 20.h),
-            // Create Account Button
-           Obx(()=> CustomButton(
-             onPress: () async {
-               if (controller.ischecked.value) {
-                 print('Creating account...');
-                 await controller.register();
 
-               } else {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   SnackBar(
-                     content: Text(
-                       'Please agree to Terms & conditions',
-                       style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-                     ),
-                     backgroundColor: AppColor.vividAmber,
-                   ),
-                 );
-               }
-             },
-             title: 'Create account',
-             loading: controller.isLoadingsignup.value,
-             textColor: Colors.black,
-             gradient: LinearGradient(
-               colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-               begin: Alignment.topLeft,
-               end: Alignment.bottomRight,
-             ),
-             width: double.infinity,
-             height: 30.h,
-             fontSize: 14.sp,
-             fontWeight: FontWeight.w600,
-           ),),
+            // Create Account Button
+            Obx(() => CustomButton(
+              onPress: () async {
+                if (controller.ischecked.value) {
+                  await controller.register();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Please agree to Terms & conditions',
+                        style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
+                      ),
+                      backgroundColor: AppColor.vividAmber,
+                    ),
+                  );
+                }
+              },
+              title: 'create_account_btn'.tr,
+              loading: controller.isLoadingsignup.value,
+              textColor: Colors.black,
+              gradient: LinearGradient(
+                colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              width: double.infinity,
+              height: 30.h,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            )),
             SizedBox(height: 14.h),
+
             // OR Divider
             Row(
               children: [
@@ -357,6 +412,7 @@ class Signup extends StatelessWidget {
               ],
             ),
             SizedBox(height: 14.h),
+
             // Social Login
             Row(
               children: [
@@ -395,20 +451,21 @@ class Signup extends StatelessWidget {
               ],
             ),
             SizedBox(height: 18.h),
+
             // Already have account
             Center(
               child: RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Already have an account? ',
+                      text: 'already_have_account'.tr,
                       style: AppTextStyles.montserratRegular.copyWith(
                         color: AppColor.mediumGrey,
                         fontSize: 14.sp,
                       ),
                     ),
                     TextSpan(
-                      text: 'Log in',
+                      text: 'log_in_link'.tr,
                       style: AppTextStyles.montserratMedium.copyWith(
                         color: AppColor.sunnyYellow,
                         fontSize: 14.sp,
@@ -416,10 +473,7 @@ class Signup extends StatelessWidget {
                       ),
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          Get.to(
-                                () => Login(),
-                            transition: Transition.rightToLeftWithFade,
-                          );
+                          Get.to(() => Login(), transition: Transition.rightToLeftWithFade);
                         },
                     ),
                   ],

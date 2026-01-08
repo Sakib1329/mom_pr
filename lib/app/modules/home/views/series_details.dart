@@ -1,14 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:Nuweli/app/modules/home/widgets/series_details.dart';
 import '../../../res/colors/color.dart';
 import '../../home/controllers/home_controller.dart';
-
-
 
 class SeriesDetailsPage extends StatelessWidget {
   @override
@@ -38,7 +34,7 @@ class SeriesDetailsPage extends StatelessWidget {
           backgroundColor: AppColor.black,
           body: Center(
             child: Text(
-              'No movie details available',
+              'no_series_details'.tr,
               style: TextStyle(color: Colors.white, fontSize: 16.sp),
             ),
           ),
@@ -51,16 +47,11 @@ class SeriesDetailsPage extends StatelessWidget {
         backgroundColor: AppColor.black,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          leading: BackButton(
-            color: Colors.white,
-            onPressed: () {
-              Get.back();
-            },
-          ),
+          leading: BackButton(color: Colors.white, onPressed: () => Get.back()),
           centerTitle: true,
           title: SvgPicture.asset('assets/icons/svg1.svg', height: 20.h),
         ),
-        body: SeriesDetailsWidget(series:series,),
+        body: SeriesDetailsWidget(series: series),
       );
     });
   }

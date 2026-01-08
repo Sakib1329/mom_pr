@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
-import 'package:Nuweli/app/res/assets/imageassets.dart';
 
 class NetflixStyleCard extends StatelessWidget {
   final String imageUrl;
@@ -53,7 +53,7 @@ class NetflixStyleCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'New Arrival',
+                      'new_arrival'.tr,
                       style: TextStyle(
                         color: AppColor.translucentWhite,
                         fontSize: 12.sp,
@@ -91,9 +91,7 @@ class NetflixStyleCard extends StatelessWidget {
   }
 
   ImageProvider _buildImageProvider(String url) {
-
     if (url.startsWith('http')) {
-
       return NetworkImage(url);
     }
     return AssetImage(url);

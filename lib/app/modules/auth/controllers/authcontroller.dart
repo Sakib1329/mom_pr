@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -12,6 +11,7 @@ import 'package:Nuweli/app/services/push_notification.dart';
 import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
 import 'package:Nuweli/app/modules/home/views/home.dart';
 import 'package:Nuweli/app/modules/home/views/navbar.dart';
+
 import '../../../constants/appconstant.dart';
 import '../../../res/colors/color.dart';
 import '../../../res/fonts/fonts.dart';
@@ -34,23 +34,42 @@ class Authcontroller extends GetxController {
   final RxString frompage = "".obs;
   final firstnamecontroller = TextEditingController();
   final lastnamecontroller = TextEditingController();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmpasswordController = TextEditingController();
   final TextEditingController countryController = TextEditingController();
+
   final isLoading = false.obs;
   final isLoadingsignup = false.obs;
   final isLoadingpass = false.obs;
   final isLoadingverify = false.obs;
   final isLoadingresend = false.obs;
   final isLoadingnewpass = false.obs;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID'],);
+  final isloadinggmail = false.obs;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(serverClientId: dotenv.env['GOOGLE_WEB_CLIENT_ID']);
   final String _baseUrl = AppConstants.baseUrl;
   final logger = Logger();
-  final isloadinggmail = false.obs;
   final _authProvider = AuthProvider();
   String registeredEmail = '';
+
+  // Password strength observables
+  final RxBool hasMinLength = false.obs;
+  final RxBool hasUppercase = false.obs;
+  final RxBool hasLowercase = false.obs;
+  final RxBool hasDigit = false.obs;
+  final RxBool hasSpecial = false.obs;
+
+  void validatePassword(String password) {
+    hasMinLength.value = password.length >= 6;
+    hasUppercase.value = RegExp(r'[A-Z]').hasMatch(password);
+    hasLowercase.value = RegExp(r'[a-z]').hasMatch(password);
+    hasDigit.value = RegExp(r'[0-9]').hasMatch(password);
+    hasSpecial.value = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+  }
+
+  bool get isPasswordStrong =>
+      hasMinLength.value && hasUppercase.value && hasLowercase.value && hasDigit.value && hasSpecial.value;
 
   @override
   void onInit() async {
@@ -72,142 +91,85 @@ class Authcontroller extends GetxController {
     final firstname = firstnamecontroller.text.trim();
     final lastname = lastnamecontroller.text.trim();
 
-    if (email.isEmpty) {
-      throw 'Email cannot be empty';
-    }
-    if (!email.contains('@')) {
-      throw 'Invalid email format';
-    }
-    if (password.isEmpty) {
-      throw 'Password cannot be empty';
-    }
-    if (isLogin) {
-      return;
-    }
-    if (firstname.isEmpty) {
-      throw 'Name cannot be empty';
-    }
-    if (lastname.isEmpty) {
-      throw 'Name cannot be empty';
-    }
-    if (confirmPass.isEmpty) {
-      throw 'Confirm password cannot be empty';
-    }
-    if (password != confirmPass) {
-      throw 'Passwords do not match';
-    }
-    if (password.length < 6) {
-      throw 'Password must be at least 6 characters';
-    }
+    if (email.isEmpty) throw 'email_empty'.tr;
+    if (!email.contains('@')) throw 'invalid_email'.tr;
+    if (password.isEmpty) throw 'password_empty'.tr;
+    if (isLogin) return;
+    if (firstname.isEmpty) throw 'name_empty'.tr;
+    if (lastname.isEmpty) throw 'name_empty'.tr;
+    if (confirmPass.isEmpty) throw 'confirm_password_empty'.tr;
+    if (password != confirmPass) throw 'passwords_not_match'.tr;
+    if (!isPasswordStrong) throw 'password_not_strong'.tr;
   }
 
   Future<void> signInWithGoogle() async {
     try {
-
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
-      print("hello");
-      print(account);
       if (account == null) {
         Get.snackbar(
-          'Google Login Cancelled',
-          'Google login was cancelled',
+          'google_login_cancelled'.tr,
+          'google_login_cancelled_msg'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.redAccent,
-          titleText: Text(
-            'Google Login Cancelled',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Google login was cancelled',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
+          titleText: Text('google_login_cancelled'.tr, style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('google_login_cancelled_msg'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
         );
         return;
       }
-print("hello");
+
       final String email = account.email;
       isloadinggmail.value = true;
-print(email);
+
       final response = await http.post(
         Uri.parse('$_baseUrl/auth/google_login/'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({ "email": email,"login_secret": "^sa@!24l425\$fZa#32f|\$"}),
+        body: jsonEncode({"email": email, "login_secret": "^sa@!24l425\$fZa#32f|\$"}),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         final box = GetStorage();
-        if (data['refresh'] != null) {
-          box.write('refreshToken', data['refresh']);
-        }
-        if (data['access'] != null) {
-          box.write('loginToken', data['access']);
-        }
+        if (data['refresh'] != null) box.write('refreshToken', data['refresh']);
+        if (data['access'] != null) box.write('loginToken', data['access']);
 
         Get.snackbar(
           'Success',
-          'Google login successful',
+          'google_login_success'.tr,
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColor.vividAmber,
-          titleText: Text(
-            'Success',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Google login successful',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
+          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
         );
-        Get.offAll(
-              () => Navbar(),
-          binding: BindingsBuilder(() {
-            // Remove old controllers
-            Get.delete<Authcontroller>(force: true);
-            Get.delete<HomeController>(force: true);
-            Get.delete<NavController>(force: true);
-            Get.delete<OnboardController>(force: true);
-            Get.delete<BottomSheetController>(force: true);
-            Get.delete<Settingcontroller>(force: true);
-            Get.delete<ComingSoonController>(force: true);
 
-            // Re-initialize all
-            InitialBinding().dependencies();
-          }),
-          transition: Transition.rightToLeft,
-        );
+        Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
+          Get.delete<Authcontroller>(force: true);
+          Get.delete<HomeController>(force: true);
+          Get.delete<NavController>(force: true);
+          Get.delete<OnboardController>(force: true);
+          Get.delete<BottomSheetController>(force: true);
+          Get.delete<Settingcontroller>(force: true);
+          Get.delete<ComingSoonController>(force: true);
+          InitialBinding().dependencies();
+        }), transition: Transition.rightToLeft);
       } else {
         Get.snackbar(
           'Error',
-          'Google login failed: ${response.body}',
+          '${'google_login_failed'.tr}: ${response.body}',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.redAccent,
-          titleText: Text(
-            'Error',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Google login failed: ${response.body}',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('${'google_login_failed'.tr}: ${response.body}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
         );
       }
     } catch (e) {
-
       Get.snackbar(
         'Exception',
         'An error occurred: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.redAccent,
-        titleText: Text(
-          'Exception',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          'An error occurred: $e',
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
+        titleText: Text('Exception', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        messageText: Text('An error occurred: $e', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
       );
-      print(e.toString());
     } finally {
       isloadinggmail.value = false;
     }
@@ -218,11 +180,7 @@ print(email);
       _validateInputs(isLogin: true);
       isLoading.value = true;
 
-      final user = UserModel(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
+      final user = UserModel(email: emailController.text.trim(), password: passwordController.text.trim());
       final success = await _authProvider.login(user);
 
       if (success) {
@@ -236,39 +194,27 @@ print(email);
 
         Get.snackbar(
           'Success',
-          'Login successful',
+          'login_success'.tr,
           backgroundColor: AppColor.vividAmber,
           snackPosition: SnackPosition.TOP,
-          titleText: Text(
-            'Success',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Login successful',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
+          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
         );
 
-        Get.offAll(
-              () => Navbar(),
-          binding: BindingsBuilder(() {
-            // Remove old controllers
-            Get.delete<Authcontroller>(force: true);
-            Get.delete<HomeController>(force: true);
-            Get.delete<NavController>(force: true);
-            Get.delete<OnboardController>(force: true);
-            Get.delete<BottomSheetController>(force: true);
-            Get.delete<Settingcontroller>(force: true);
-            Get.delete<ComingSoonController>(force: true);
+        Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
+          Get.delete<Authcontroller>(force: true);
+          Get.delete<HomeController>(force: true);
+          Get.delete<NavController>(force: true);
+          Get.delete<OnboardController>(force: true);
+          Get.delete<BottomSheetController>(force: true);
+          Get.delete<Settingcontroller>(force: true);
+          Get.delete<ComingSoonController>(force: true);
+          InitialBinding().dependencies();
+        }), transition: Transition.rightToLeft);
 
-            // Re-initialize all
-            InitialBinding().dependencies();
-          }),
-          transition: Transition.rightToLeft,
-        );
         await initFCM();
       } else {
-        throw 'Login timed out';
+        throw 'login_timed_out'.tr;
       }
     } catch (e) {
       Get.snackbar(
@@ -276,14 +222,8 @@ print(email);
         e.toString(),
         backgroundColor: AppColor.customDodgerBlue,
         snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
+        titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
       );
     } finally {
       isLoading.value = false;
@@ -299,7 +239,8 @@ print(email);
         firstName: firstnamecontroller.text.trim(),
         lastName: lastnamecontroller.text.trim(),
         email: emailController.text.trim(),
-        password: passwordController.text.trim(), country: countryController.text.trim(),
+        password: passwordController.text.trim(),
+        country: countryController.text.trim(),
       );
 
       final success = await _authProvider.register(newuser);
@@ -308,21 +249,15 @@ print(email);
         registeredEmail = newuser.email;
         Get.snackbar(
           'Success',
-          'A',
+          'otp_sent_success'.tr,
           backgroundColor: AppColor.customDodgerBlue,
           snackPosition: SnackPosition.TOP,
-          titleText: Text(
-            'Success',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'An OTP has been sent to your email address. Please check your inbox',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
+          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('otp_sent_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
         );
-        Get.offAll(Otpverifications(email: emailController.value.text.trim(), fromPage: frompage.value));
+        Get.offAll(Otpverifications(email: emailController.text.trim(), fromPage: frompage.value));
       } else {
-        throw 'Registration failed';
+        throw 'registration_failed'.tr;
       }
     } catch (e) {
       Get.snackbar(
@@ -330,14 +265,8 @@ print(email);
         e.toString(),
         backgroundColor: AppColor.customDodgerBlue,
         snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
+        titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
       );
     } finally {
       isLoadingsignup.value = false;
@@ -346,84 +275,41 @@ print(email);
 
   Future<void> activateAccount(String otp) async {
     if (otp.length != 4) {
-      Get.snackbar(
-        'Error',
-        'Invalid OTP',
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          'Invalid OTP',
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
-      );
+      Get.snackbar('Error', 'invalid_otp'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('invalid_otp'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
       return;
     }
 
     try {
       isLoadingverify.value = true;
 
+      bool success;
       if (frompage.value == "signup") {
-        final success = await _authProvider.activateAccount(registeredEmail, otp);
+        success = await _authProvider.activateAccount(registeredEmail, otp);
         if (success) {
-          Get.snackbar(
-            'Success',
-            'Account activated successfully',
-            backgroundColor: AppColor.customDodgerBlue,
-            snackPosition: SnackPosition.TOP,
-            titleText: Text(
-              'Success',
-              style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-            ),
-            messageText: Text(
-              'Account activated successfully',
-              style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-            ),
-          );
+          Get.snackbar('Success', 'account_activated'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+              titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+              messageText: Text('account_activated'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
           Get.offAll(() => Verifiedpage(page: frompage.value));
         } else {
-          throw 'Account activation failed';
+          throw 'activation_failed'.tr;
         }
       } else {
-        final success = await _authProvider.otpActivate(registeredEmail, otp);
+        success = await _authProvider.otpActivate(registeredEmail, otp);
         if (success) {
-          Get.snackbar(
-            'Success',
-            'Password reset successful',
-            backgroundColor: AppColor.customDodgerBlue,
-            snackPosition: SnackPosition.TOP,
-            titleText: Text(
-              'Success',
-              style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-            ),
-            messageText: Text(
-              'Password reset successful',
-              style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-            ),
-          );
-          Get.offAll(Changepass(),transition: Transition.rightToLeft);
+          Get.snackbar('Success', 'password_reset_success'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+              titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+              messageText: Text('password_reset_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+          Get.offAll(Changepass(), transition: Transition.rightToLeft);
         } else {
-          throw 'Account activation failed';
+          throw 'activation_failed'.tr;
         }
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
-      );
+      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
     } finally {
       isLoadingverify.value = false;
     }
@@ -432,42 +318,18 @@ print(email);
   Future<void> resendOtp() async {
     try {
       isLoadingresend.value = true;
-
       final success = await _authProvider.resendOtp(registeredEmail);
-
       if (success) {
-        Get.snackbar(
-          'OTP Sent',
-          'Check your email for the OTP',
-          backgroundColor: AppColor.customDodgerBlue,
-          snackPosition: SnackPosition.TOP,
-          titleText: Text(
-            'OTP Sent',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Check your email for the OTP',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
-        );
+        Get.snackbar('OTP Sent', 'otp_resent'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+            titleText: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            messageText: Text('otp_resent'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
       } else {
-        throw 'Failed to resend OTP';
+        throw 'resend_failed'.tr;
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
-      );
+      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
     } finally {
       isLoadingresend.value = false;
     }
@@ -476,43 +338,20 @@ print(email);
   Future<void> resetPasswordRequest(String email) async {
     try {
       isLoadingpass.value = true;
-      registeredEmail=email;
+      registeredEmail = email;
       final success = await _authProvider.resetPassword(registeredEmail);
-
       if (success) {
-        Get.snackbar(
-          'OTP Sent',
-          'OTP sent for password reset',
-          backgroundColor: AppColor.customDodgerBlue,
-          snackPosition: SnackPosition.TOP,
-          titleText: Text(
-            'OTP Sent',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'OTP sent for password reset',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
-        );
-        Get.off(Otpverifications(email: email, fromPage: "forgot_password"),transition: Transition.rightToLeftWithFade);
+        Get.snackbar('OTP Sent', 'otp_sent_reset'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+            titleText: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            messageText: Text('otp_sent_reset'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+        Get.off(Otpverifications(email: email, fromPage: "forgot_password"), transition: Transition.rightToLeftWithFade);
       } else {
-        throw 'Password reset request failed';
+        throw 'reset_request_failed'.tr;
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
-      );
+      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
     } finally {
       isLoadingpass.value = false;
     }
@@ -524,42 +363,19 @@ print(email);
 
     try {
       isLoadingnewpass.value = true;
-
       final success = await _authProvider.setNewPassword(registeredEmail, passwordController.text.trim());
       if (success) {
-        Get.snackbar(
-          'Success',
-          'Password reset successfully',
-          backgroundColor: AppColor.customDodgerBlue,
-          snackPosition: SnackPosition.TOP,
-          titleText: Text(
-            'Success',
-            style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-          ),
-          messageText: Text(
-            'Password reset successfully',
-            style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-          ),
-        );
-        Get.offAll(Verifiedpage(page: "forgot_password",),transition: Transition.rightToLeft);
+        Get.snackbar('Success', 'password_reset_done'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+            titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            messageText: Text('password_reset_done'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+        Get.offAll(Verifiedpage(page: "forgot_password"), transition: Transition.rightToLeft);
       } else {
         throw 'Password reset failed';
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text(
-          'Error',
-          style: AppTextStyles.montserratBold.copyWith(color: AppColor.background),
-        ),
-        messageText: Text(
-          e.toString(),
-          style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background),
-        ),
-      );
+      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
     } finally {
       isLoadingnewpass.value = false;
     }
