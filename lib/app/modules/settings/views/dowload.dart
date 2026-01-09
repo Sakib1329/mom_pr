@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/Get.dart';
@@ -28,6 +30,17 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   void dispose() {
     _downloadManager.removeDownloadEventListener(this);
     super.dispose();
+  }
+  String formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60);
+    final seconds = d.inSeconds.remainder(60);
+
+    if (hours > 0) {
+      return '${hours}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    } else {
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    }
   }
 
   @override
@@ -80,9 +93,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                 'status: ${status.status}');
       }
 
-      // FINAL WORKING FILTER
-      // Your version uses status == 5 for completed
-      // We ignore isExpired because it's a Future<bool?> and causes issues
+
       final completed = all.where((status) {
         return status.status == VdoDownloadManager.STATUS_COMPLETED || status.status == 5;
       }).toList();
@@ -129,32 +140,37 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       ),
       body: RefreshIndicator(
         onRefresh: _loadDownloads,
+        color: AppColor.vividAmber,
+        backgroundColor: AppColor.greyDark,
         child: downloadedVideos.isEmpty
             ? Center(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.file_download_off,
-                  size: 100.sp,
-                  color: AppColor.customGray,
-                ),
-                SizedBox(height: 20.h),
-                Text(
-                  'no_downloads_yet'.tr,
-                  style: TextStyle(color: Colors.white, fontSize: 20.sp),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 10.h),
-                Text(
-                  'tap_download_on_movie_details'.tr,
-                  style: TextStyle(
-                      color: AppColor.customGray, fontSize: 14.sp),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.file_download_off,
+                    size: 100.sp,
+                    color: AppColor.customGray,
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(
+                    'no_downloads_yet'.tr,
+                    style: TextStyle(color: Colors.white, fontSize: 20.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'tap_download_on_movie_details'.tr,
+                    style: TextStyle(
+                        color: AppColor.customGray, fontSize: 14.sp),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
         )
@@ -163,8 +179,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
           itemCount: downloadedVideos.length,
           itemBuilder: (context, index) {
             final status = downloadedVideos[index];
-            final title = status.mediaInfo?.title ?? 'untitled'.tr;
-            final mediaId = status.mediaInfo?.mediaId ?? '';
+            final title = status.mediaInfo.title ?? 'untitled'.tr;
+            final mediaId = status.mediaInfo.mediaId ?? '';
+            final poster = status.poster;
+            final duration = status.mediaInfo.duration;
+            final durationText = formatDuration(duration);
 
             return GestureDetector(
               onTap: () {
@@ -185,18 +204,26 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                   children: [
                     Container(
                       width: 120.w,
-                      height: 70.h,
+                      height: 80.h,
                       decoration: BoxDecoration(
-                        color: AppColor.customDarkGray2,
                         borderRadius: BorderRadius.circular(8.r),
+                        image: DecorationImage(
+                          image: FileImage(File(poster!)),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.play_circle_fill,
-                        color: AppColor.vividAmber,
-                        size: 40.sp,
+                      child: Center(
+                        child: Icon(
+                          Icons.play_circle_fill,
+                          color: AppColor.vividAmber,
+                          size: 40.sp,
+                        ),
                       ),
                     ),
+
                     SizedBox(width: 12.w),
+
+                    // 📄 Title + duration text (UNCHANGED)
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,17 +238,30 @@ class _DownloadsScreenState extends State<DownloadsScreen>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            'complete_offline'.tr,
-                            style: TextStyle(
-                              color: AppColor.customGray,
-                              fontSize: 12.sp,
-                            ),
+                          SizedBox(height: 6.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 14.sp,
+                                color: AppColor.customGray,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                durationText,
+                                style: TextStyle(
+                                  color: AppColor.customGray,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
+
+                    // 🗑 Delete button
                     IconButton(
                       icon: const Icon(
                         Icons.delete_forever,
@@ -234,7 +274,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               ),
             );
           },
-        ),
+        )
+
+
       ),
     );
   }
