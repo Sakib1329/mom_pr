@@ -15,12 +15,13 @@ import 'app/modules/onboard/views/splash.dart';
 import 'app/bindings/initialbindings.dart';
 import 'app/res/colors/color.dart';
 
-import 'app/services/notification_services.dart';  // ← FIXED: no "s" at the end
+import 'app/services/notification_services.dart';
+import 'app/services/push_notification.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
-// ────────────────────── BACKGROUND HANDLER (APP KILLED) ──────────────────────
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -29,29 +30,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await showRichNotification(message.data, isBackground: true);
 }
 
-// ────────────────────── MAIN ──────────────────────
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
+  await initLocalNotifications();
   await GetStorage.init();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await dotenv.load(fileName: "assets/.env");
 
-  // Initialize local notifications (channel will be created inside showRichNotification)
-  await flutterLocalNotificationsPlugin.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
-    ),
-  );
-
-  // ───── FOREGROUND MESSAGES (when app is open) ─────
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("FOREGROUND → Message received: ${message.data}");
-    // Your backend sends notification={}, so system shows tiny one
-    // We override it with our beautiful rich notification
+
     if (message.data.isNotEmpty) {
       showRichNotification(message.data, isBackground: false);
     }

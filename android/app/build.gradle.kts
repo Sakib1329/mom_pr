@@ -31,8 +31,8 @@ android {
         applicationId = "com.magicverse.mompr"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 3        // <- increment this
-        versionName = "1.0.3"
+        versionCode = 4
+        versionName = "1.0.4"
     }
 
     signingConfigs {

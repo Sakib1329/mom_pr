@@ -10,6 +10,7 @@ import 'notification_services.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> initLocalNotifications() async {
+  // ---------------- ANDROID CHANNEL ----------------
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel',
     'Important Notifications',
@@ -18,16 +19,46 @@ Future<void> initLocalNotifications() async {
     playSound: true,
   );
 
-  final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  final androidPlugin =
+  flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+      AndroidFlutterLocalNotificationsPlugin>();
+
   await androidPlugin?.createNotificationChannel(channel);
 
+  // ---------------- INITIALIZATION ----------------
+  const AndroidInitializationSettings androidSettings =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const DarwinInitializationSettings iosSettings =
+  DarwinInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+  );
+
+  const InitializationSettings settings = InitializationSettings(
+    android: androidSettings,
+    iOS: iosSettings,
+  );
+
   await flutterLocalNotificationsPlugin.initialize(
-    const InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher')),
-    onDidReceiveNotificationResponse: (details) {
-      print('Notification tapped: ${details.payload}');
-    },
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        defaultPresentAlert: true,    // Ensures foreground display (banner/alert)
+        defaultPresentBadge: true,
+        defaultPresentSound: true,
+        defaultPresentBanner: true,   // For iOS 15+ banner style
+        defaultPresentList: true,     // For notification center
+      ),
+    ),
+
   );
 }
+
 
 Future<void> showNotification(RemoteMessage message) async {
   await showRichNotification(message.data, isBackground: false);

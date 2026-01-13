@@ -127,12 +127,16 @@ Future<void> showRichNotification(Map<String, dynamic> data, {required bool isBa
         styleInformation: bigPic,
         playSound: true,
         enableVibration: true,
-        showWhen: true,
-
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
       ),
     ),
     payload: jsonEncode(data),
   );
+
 
   print("$prefix → NOTIFICATION SHOWN: $title");
 }
