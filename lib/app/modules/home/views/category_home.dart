@@ -1,17 +1,19 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:Nuweli/app/res/assets/imageassets.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/streaming_wdiget.dart';
+import '../models/movie_model.dart';
 
 class CategoryHome extends StatelessWidget {
   const CategoryHome({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     final HomeController homeController = Get.find<HomeController>();
+    homeController.loadContinueWatching();
 
     return Obx(() {
       if (homeController.isAllContentLoading.value) {
@@ -39,6 +41,10 @@ class CategoryHome extends StatelessWidget {
       final data = homeController.allContentResponse.value!;
       final movies = data.movies;
       final series = data.series;
+
+      // --- LOGIC FOR CONTINUE WATCHING ---
+      // We pull the items fetched from the continue_progress endpoint
+      final List<Movie> continueWatchingList = homeController.continueWatchingItems.toList();
 
       final bannerMovies = <String, List<String>>{};
       for (var item in homeController.popularItems) {
@@ -84,17 +90,10 @@ class CategoryHome extends StatelessWidget {
           : [
         {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_5},
         {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_6},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_7},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_8},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_9},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_10},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_11},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_12},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_13},
-        {'id': 0, 'alias': 'movie', 'poster': ImageAssets.img_14},
       ];
 
       return CategoryHomeWidget(
+        continueWatchingList: continueWatchingList,
         bannerMovies: bannerMovies,
         previewItems: finalPreviewItems,
         categoryImages: categoryImages,
@@ -105,28 +104,17 @@ class CategoryHome extends StatelessWidget {
 
   List<dynamic> _getCategoryField(dynamic response, String category) {
     switch (category) {
-      case 'popular':
-        return response.popular;
-      case 'watch_later':
-        return response.watchLater;
-      case 'watch_history':
-        return response.watchHistory;
-      case 'previous_year':
-        return response.previousYear;
-      case 'animation':
-        return response.animation;
-      case 'action':
-        return response.action;
-      case 'drama':
-        return response.drama;
-      case 'horror':
-        return response.horror;
-      case 'science_fiction':
-        return response.scienceFiction;
-      case 'mystery':
-        return response.mystery;
-      default:
-        return [];
+      case 'popular': return response.popular;
+      case 'watch_later': return response.watchLater;
+      case 'watch_history': return response.watchHistory;
+      case 'previous_year': return response.previousYear;
+      case 'animation': return response.animation;
+      case 'action': return response.action;
+      case 'drama': return response.drama;
+      case 'horror': return response.horror;
+      case 'science_fiction': return response.scienceFiction;
+      case 'mystery': return response.mystery;
+      default: return [];
     }
   }
 

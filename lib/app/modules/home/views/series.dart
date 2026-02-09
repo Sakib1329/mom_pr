@@ -62,7 +62,7 @@ class Seriespage extends StatelessWidget {
           bannerMovies: bannerMovies,
           previewItems: previewItems,
           categoryImages: categoryImages,
-          homeController: homeController,
+          homeController: homeController, continueWatchingList: [],
         ),
       );
     });

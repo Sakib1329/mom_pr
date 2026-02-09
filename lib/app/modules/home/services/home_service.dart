@@ -203,7 +203,7 @@ static  Future<Series> getSeriesDetails(int id, String aliastype) async {
     }
   }
 
- Future<Map<String, String>> getVideoPlaylist(
+ Future<Map<String, dynamic>> getVideoPlaylist(
      String fileUuid, {
        bool offline = false,
      }) async {
@@ -231,12 +231,7 @@ static  Future<Series> getSeriesDetails(int id, String aliastype) async {
      );
 
      if (response.statusCode == 200) {
-       final jsonData = jsonDecode(response.body);
-
-       return {
-         'otp': jsonData['otp'] as String,
-         'playbackInfo': jsonData['playbackInfo'] as String,
-       };
+       return jsonDecode(response.body) as Map<String, dynamic>;
      } else {
        throw Exception(
          'Failed to load video playlist: ${response.statusCode} → ${response.body}',
@@ -248,7 +243,8 @@ static  Future<Series> getSeriesDetails(int id, String aliastype) async {
  }
 
 
-  Future<List<String>> getGenres() async {
+
+ Future<List<String>> getGenres() async {
     try {
       final token = box.read('loginToken');
       if (token == null) {
@@ -510,4 +506,63 @@ print(response);
       throw Exception('Error disliking $aliastype: $e');
     }
   }
+ Future<void> saveProgress({
+   required String fileUuid,
+   required int lastPosition,
+   required int totalDuration,
+ }) async {
+   try {
+     final token = box.read('loginToken');
+     if (token == null) {
+       throw Exception('No login token found');
+     }
+print(lastPosition);
+     print(totalDuration);
+     final response = await http.post(
+       Uri.parse('${AppConstants.baseUrl}/movie_and_series/save_progress/'),
+       headers: {
+         'Content-Type': 'application/json',
+         'Authorization': 'Bearer $token',
+       },
+       body: jsonEncode({
+         "file_uuid": fileUuid,
+         "last_position_seconds": lastPosition,
+         "total_duration_seconds": totalDuration,
+       }),
+     );
+
+     if (response.statusCode == 200 || response.statusCode == 201) {
+       print('Progress saved successfully: $lastPosition seconds');
+     } else {
+       print('Failed to save progress:$lastPosition seconds ${response.statusCode} - ${response.body}');
+     }
+   } catch (e) {
+     print('Error saving progress: $e');
+     // We usually don't throw here to avoid interrupting the UI when closing the player
+   }
+ }
+ Future<AllContentResponse> getContinueWatching() async {
+   try {
+     final token = box.read('loginToken');
+     if (token == null) throw Exception('No login token found');
+
+     final response = await http.get(
+       Uri.parse('${AppConstants.baseUrl}/movie_and_series/continue_progress/'),
+       headers: {
+         'Content-Type': 'application/json',
+         'Authorization': 'Bearer $token',
+       },
+     );
+
+     if (response.statusCode == 200) {
+       final jsonData = jsonDecode(response.body);
+       // This uses your AllContentResponse model to parse the "movies" and "episodes" arrays
+       return AllContentResponse.fromJson(jsonData);
+     } else {
+       throw Exception('Failed to load continue watching: ${response.statusCode}');
+     }
+   } catch (e) {
+     throw Exception('Error fetching continue watching: $e');
+   }
+ }
 }

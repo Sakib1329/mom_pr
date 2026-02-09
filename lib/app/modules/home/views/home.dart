@@ -162,8 +162,6 @@ class HomePage extends StatelessWidget {
                         ),
                         SizedBox(height: 10.h),
 
-                        /// 🔹 If Home (index 0) → show full list
-                        /// 🔹 Else → show only selected tab + "Category"
                         Obx(() {
                           if (controller.currentIndex.value == 0) {
                             return SingleChildScrollView(

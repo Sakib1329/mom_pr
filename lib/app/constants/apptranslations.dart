@@ -5,6 +5,7 @@ class AppTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
     // English
     'en_US': {
+      'continue_watching': 'Continue Watching',
       'download_started': 'Download started',
       'download_error': 'Download error',
       'downloads': 'Downloads',
@@ -242,7 +243,7 @@ class AppTranslations extends Translations {
       'enter_text': 'Enter Text',
       'delete_account_btn': 'Delete Account',
 
-      'choose_plan': 'Choose a plan to enjoy Werli',
+      'choose_plan': 'Choose a plan to enjoy Nuweli',
       'premium_content': 'Premium Content',
       'ad_free': 'Ad Free Experience',
       '4k_streaming': '4k Streaming',
@@ -265,6 +266,7 @@ class AppTranslations extends Translations {
 
     // French
     'fr_FR': {
+      'continue_watching': 'Continuer à regarder',
       'download_started': 'Téléchargement démarré',
       'download_error': 'Erreur de téléchargement',
 
@@ -494,7 +496,7 @@ class AppTranslations extends Translations {
       'enter_text': 'Entrez le texte',
       'delete_account_btn': 'Supprimer le compte',
 
-      'choose_plan': 'Choisissez un plan pour profiter de Werli',
+      'choose_plan': 'Choisissez un plan pour profiter de Nuweli',
       'premium_content': 'Contenu Premium',
       'ad_free': 'Expérience sans publicité',
       '4k_streaming': 'Streaming 4K',
@@ -517,6 +519,7 @@ class AppTranslations extends Translations {
 
     // Spanish
     'es_ES': {
+      'continue_watching': 'Continuar viendo',
       'download_started': 'Descarga iniciada',
       'download_error': 'Error de descarga',
 
@@ -748,7 +751,7 @@ class AppTranslations extends Translations {
       'enter_text': 'Ingresa texto',
       'delete_account_btn': 'Eliminar cuenta',
 
-      'choose_plan': 'Elige un plan para disfrutar de Werli',
+      'choose_plan': 'Elige un plan para disfrutar de Nuweli',
       'premium_content': 'Contenido Premium',
       'ad_free': 'Experiencia sin anuncios',
       '4k_streaming': 'Streaming 4K',

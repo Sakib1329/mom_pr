@@ -20,7 +20,11 @@ class Movie {
   final bool liked;
   final bool disliked;
   final String? trailer;
-  final String? comingSoonTime; // <-- NOW INCLUDED
+  final String? comingSoonTime;
+
+  // Progress tracking fields for "Continue Watching"
+  final int? lastPosition;
+  final int? totalDuration;
 
   Movie({
     required this.id,
@@ -42,10 +46,15 @@ class Movie {
     required this.liked,
     required this.disliked,
     this.trailer,
-    this.comingSoonTime, // <-- Added
+    this.comingSoonTime,
+    this.lastPosition,
+    this.totalDuration,
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
+    // Extract the status object for progress tracking
+    final status = json['status'] as Map<String, dynamic>?;
+
     bool? parseBool(dynamic value) {
       if (value == null) return null;
       if (value is bool) return value;
@@ -93,7 +102,10 @@ class Movie {
       liked: parseBool(json['liked']) ?? false,
       disliked: parseBool(json['disliked']) ?? false,
       trailer: json['trailer']?.toString(),
-      comingSoonTime: json['comming_soon_time']?.toString(), // <-- Correct key
+      comingSoonTime: json['comming_soon_time']?.toString(),
+      // Progress parsing
+      lastPosition: status?['last_position_seconds'],
+      totalDuration: status?['total_duration_seconds'],
     );
   }
 
@@ -118,8 +130,22 @@ class Movie {
       'liked': liked,
       'disliked': disliked,
       'trailer': trailer,
-      'comming_soon_time': comingSoonTime, // Include in output
+      'comming_soon_time': comingSoonTime,
+      'status': {
+        'last_position_seconds': lastPosition,
+        'total_duration_seconds': totalDuration,
+      }
     };
+  }
+
+  // --- HELPERS ---
+
+  /// Calculates progress as a value between 0.0 and 1.0 for the progress bar
+  double get watchProgress {
+    if (lastPosition == null || totalDuration == null || totalDuration! <= 0) {
+      return 0.0;
+    }
+    return (lastPosition! / totalDuration!).clamp(0.0, 1.0);
   }
 
   String get formattedDuration {
@@ -137,7 +163,6 @@ class Movie {
 
   bool get hasTrailer => trailer != null && trailer!.isNotEmpty;
 
-  // Helper: Is this movie coming soon?
   bool get isComingSoon {
     if (comingSoonTime == null) return false;
     try {
@@ -148,7 +173,6 @@ class Movie {
     }
   }
 
-  // Helper: Format coming soon date
   String get formattedComingSoonDate {
     if (comingSoonTime == null) return 'Soon';
     try {

@@ -1,3 +1,3 @@
 class AppConstants {
-  static const String baseUrl = "http://172.252.13.73";
+  static const String baseUrl = "https://admin.nuweli.com";
 }

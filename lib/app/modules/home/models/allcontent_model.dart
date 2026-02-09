@@ -1,71 +1,80 @@
 import 'package:Nuweli/app/modules/home/models/series_model.dart';
 import 'package:Nuweli/app/modules/home/models/seriesresponse_model.dart';
-
 import 'movie_model.dart';
 import 'movieresponse_model.dart';
 
 class AllContentResponse {
   final MovieResponse movies;
   final SeriesResponse series;
+  // Added a direct list for flat responses like 'Continue Watching'
+  final List<Movie> continueWatchingMovies;
 
-  AllContentResponse({required this.movies, required this.series});
+  AllContentResponse({
+    required this.movies,
+    required this.series,
+    this.continueWatchingMovies = const [],
+  });
 
   factory AllContentResponse.fromJson(Map<String, dynamic> json) {
+    // Check if the response is from the 'continue_progress' endpoint
+    // which has 'movies' at the root instead of inside 'data'
+    final bool isContinueProgress = json.containsKey('movies') && !json.containsKey('data');
+
     final data = json['data'] ?? {};
     final moviesData = data['movies'] ?? {};
     final seriesData = data['series'] ?? {};
 
-    // Helper: Parse movie category list
-    List<Movie> _parseMovieCategory(dynamic categoryList) {
-      if (categoryList == null) return [];
-      return (categoryList as List<dynamic>)
+    // Helper: Parse movie list
+    List<Movie> _parseMovieList(dynamic list) {
+      if (list == null) return [];
+      return (list as List<dynamic>)
           .map((item) => Movie.fromJson(item as Map<String, dynamic>))
           .toList();
     }
 
-    // Helper: Parse series category list
-    List<Series> _parseSeriesCategory(dynamic categoryList) {
-      if (categoryList == null) return [];
-      return (categoryList as List<dynamic>)
+    // Helper: Parse series list
+    List<Series> _parseSeriesList(dynamic list) {
+      if (list == null) return [];
+      return (list as List<dynamic>)
           .map((item) => Series.fromJson(item as Map<String, dynamic>))
           .toList();
     }
 
-    // Parse movies into MovieResponse
-    MovieResponse parseMovies(Map<String, dynamic> moviesData) {
-      return MovieResponse(
-        popular: _parseMovieCategory(moviesData['popular']),
-        watchLater: _parseMovieCategory(moviesData['watch_later']),
-        watchHistory: _parseMovieCategory(moviesData['watch_history']),
-        previousYear: _parseMovieCategory(moviesData['previous_year']),
-        animation: _parseMovieCategory(moviesData['animation']),
-        action: _parseMovieCategory(moviesData['action']),
-        drama: _parseMovieCategory(moviesData['drama']),
-        horror: _parseMovieCategory(moviesData['horror']),
-        scienceFiction: _parseMovieCategory(moviesData['science-fiction']),
-        mystery: _parseMovieCategory(moviesData['mystery']),
+    if (isContinueProgress) {
+      // Logic for /movie_and_series/continue_progress/
+      return AllContentResponse(
+        continueWatchingMovies: _parseMovieList(json['movies']),
+        movies: MovieResponse(popular: [], watchLater: [], watchHistory: [], previousYear: [], animation: [], action: [], drama: [], horror: [], scienceFiction: [], mystery: []),
+        series: SeriesResponse(popular: [], watchLater: [], watchHistory: [], previousYear: [], animation: [], action: [], drama: [], horror: [], scienceFiction: [], mystery: []),
       );
     }
 
-    // Parse series into SeriesResponse
-    SeriesResponse parseSeries(Map<String, dynamic> seriesData) {
-      return SeriesResponse(
-        popular: _parseSeriesCategory(seriesData['popular']),
-        watchLater: _parseSeriesCategory(seriesData['watch_later']),
-        watchHistory: _parseSeriesCategory(seriesData['watch_history']),
-        previousYear: _parseSeriesCategory(seriesData['previous_year']),
-        animation: _parseSeriesCategory(seriesData['animation']),
-        action: _parseSeriesCategory(seriesData['action']),
-        drama: _parseSeriesCategory(seriesData['drama']),
-        horror: _parseSeriesCategory(seriesData['horror']),
-        scienceFiction: _parseSeriesCategory(seriesData['science-fiction']),
-        mystery: _parseSeriesCategory(seriesData['mystery']),
-      );
-    }
-
+    // Standard Logic for the Home Feed /movie_and_series/all/
     return AllContentResponse(
-      movies: parseMovies(moviesData),
-      series: parseSeries(seriesData),
+      movies: MovieResponse(
+        popular: _parseMovieList(moviesData['popular']),
+        watchLater: _parseMovieList(moviesData['watch_later']),
+        watchHistory: _parseMovieList(moviesData['watch_history']),
+        previousYear: _parseMovieList(moviesData['previous_year']),
+        animation: _parseMovieList(moviesData['animation']),
+        action: _parseMovieList(moviesData['action']),
+        drama: _parseMovieList(moviesData['drama']),
+        horror: _parseMovieList(moviesData['horror']),
+        scienceFiction: _parseMovieList(moviesData['science-fiction']),
+        mystery: _parseMovieList(moviesData['mystery']),
+      ),
+      series: SeriesResponse(
+        popular: _parseSeriesList(seriesData['popular']),
+        watchLater: _parseSeriesList(seriesData['watch_later']),
+        watchHistory: _parseSeriesList(seriesData['watch_history']),
+        previousYear: _parseSeriesList(seriesData['previous_year']),
+        animation: _parseSeriesList(seriesData['animation']),
+        action: _parseSeriesList(seriesData['action']),
+        drama: _parseSeriesList(seriesData['drama']),
+        horror: _parseSeriesList(seriesData['horror']),
+        scienceFiction: _parseSeriesList(seriesData['science-fiction']),
+        mystery: _parseSeriesList(seriesData['mystery']),
+      ),
     );
   }
 
@@ -73,6 +82,7 @@ class AllContentResponse {
     return {
       'movies': movies.toJson(),
       'series': series.toJson(),
+      'continue_watching_movies': continueWatchingMovies.map((e) => e.toJson()).toList(),
     };
   }
 }

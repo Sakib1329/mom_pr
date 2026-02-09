@@ -64,7 +64,7 @@ class Moviepage extends StatelessWidget {
           bannerMovies: bannerMovies,
           previewItems: previewItems,
           categoryImages: categoryImages,
-          homeController: homeController,
+          homeController: homeController, continueWatchingList: [],
         ),
       );
     });

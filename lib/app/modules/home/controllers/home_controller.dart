@@ -79,6 +79,29 @@ class HomeController extends GetxController {
   var allSeriesResponse = Rxn<SeriesResponse>();
   var isAllSeriesLoading = false.obs;
   var allSeriesErrorMessage = ''.obs;
+  // 1. Your observable list
+  var continueWatchingItems = <Movie>[].obs;
+  var isContinueLoading = false.obs; // Recommended to show a loader if needed
+
+  Future<void> loadContinueWatching() async {
+    try {
+      isContinueLoading.value = true;
+
+      // Call the service
+      AllContentResponse response = await _homeService.getContinueWatching();
+
+      // 2. Update the UI observable
+      // We use .assignAll to notify listeners and replace the old list
+      continueWatchingItems.assignAll(response.continueWatchingMovies);
+
+      debugPrint("Loaded ${continueWatchingItems.length} continue watching items");
+    } catch (e) {
+      debugPrint("Error loading continue watching: $e");
+    } finally {
+      isContinueLoading.value = false;
+    }
+  }
+
 
   @override
   void onInit() {
@@ -98,6 +121,7 @@ class HomeController extends GetxController {
     fetchAllMovies();
     fetchAllContent();
     fetchWatchhistoryData();
+    loadContinueWatching();
   }
 
   @override
