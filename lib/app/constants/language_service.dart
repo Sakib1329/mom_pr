@@ -32,6 +32,7 @@ class LanguageApiService {
         if (response.body.isNotEmpty) {
           final jsonData = jsonDecode(response.body);
           print('🌍 Language updated successfully → $jsonData');
+          print(languageCode);
         } else {
           print('🌍 Language updated successfully');
         }

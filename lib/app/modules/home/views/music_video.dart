@@ -1,3 +1,4 @@
+import 'package:Nuweli/app/res/fonts/fonts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,14 @@ class MusicVideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body:Text("Hola")
+      body: Center(
+        child: Text(
+          "No documentaries available yet.\nComing soon.",
+          style: AppTextStyles.montserratBold,
+          textAlign: TextAlign.center,
+        ),
+
+      ),
     );
   }
 }

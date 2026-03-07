@@ -262,10 +262,31 @@ class AppTranslations extends Translations {
       'payment_success': 'Payment Successful!',
       'payment_cancelled': 'Payment Cancelled or Failed',
       'payment_timeout': 'Payment process timed out',
+      'your_subscription': 'Your Subscription',
+      'active': 'Active',
+      'next_billing': 'Next Billing',
+      'cancel_subscription': 'Cancel Subscription',
+      'confirm_cancel': 'Confirm Cancellation',
+      'cancel_subscription_message': 'Are you sure you want to cancel your subscription? You will lose access after the current period ends.',
+      'no': 'No',
+      'yes_cancel': 'Yes, Cancel',
+      "keep_subscription": "Keep Subscription",
+      'unsubscribe': 'Unsubscribe',
     },
 
     // French
     'fr_FR': {
+      'unsubscribe': 'Se désabonner',
+
+      "keep_subscription": "Conserver l'abonnement",
+      'your_subscription': 'Votre abonnement',
+      'active': 'Actif',
+      'next_billing': 'Prochain renouvellement',
+      'cancel_subscription': 'Annuler l\'abonnement',
+      'confirm_cancel': 'Confirmer l\'annulation',
+      'cancel_subscription_message': 'Êtes-vous sûr de vouloir annuler votre abonnement ? Vous perdrez l\'accès après la fin de la période en cours.',
+      'no': 'Non',
+      'yes_cancel': 'Oui, Annuler',
       'continue_watching': 'Continuer à regarder',
       'download_started': 'Téléchargement démarré',
       'download_error': 'Erreur de téléchargement',
@@ -518,7 +539,19 @@ class AppTranslations extends Translations {
     },
 
     // Spanish
+
     'es_ES': {
+      'unsubscribe': 'Darse de baja',
+
+      "keep_subscription": "Mantener la suscripción",
+      'your_subscription': 'Tu Suscripción',
+      'active': 'Activo',
+      'next_billing': 'Próxima facturación',
+      'cancel_subscription': 'Cancelar Suscripción',
+      'confirm_cancel': 'Confirmar Cancelación',
+      'cancel_subscription_message': '¿Estás seguro de que deseas cancelar tu suscripción? Perderás el acceso después del período actual.',
+      'no': 'No',
+      'yes_cancel': 'Sí, Cancelar',
       'continue_watching': 'Continuar viendo',
       'download_started': 'Descarga iniciada',
       'download_error': 'Error de descarga',

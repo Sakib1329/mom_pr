@@ -15,7 +15,7 @@ class MovieDetailsPage extends StatelessWidget {
       if (homeController.isDetailsLoading.value) {
         return Scaffold(
           backgroundColor: AppColor.black,
-          body: const Center(child: CircularProgressIndicator()),
+          body: const Center(child: CircularProgressIndicator(color: AppColor.vividAmber,)),
         );
       }
       if (homeController.detailsErrorMessage.isNotEmpty) {

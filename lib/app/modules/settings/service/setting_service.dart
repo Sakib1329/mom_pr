@@ -253,4 +253,70 @@ print(response.body);
       throw Exception('Error fetching subscription prices: $e');
     }
   }
+  /// Fetch current subscription status from /payment/profile/
+  Future<Map<String, dynamic>?> fetchSubscriptionProfile() async {
+    try {
+      final token = box.read('loginToken');
+      if (token == null) {
+        print("No login token found for subscription profile");
+        return null;
+      }
+
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/payment/profile/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Subscription profile status: ${response.statusCode}");
+      // print(response.body);   // ← uncomment during debugging only
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;  // expected: { "is_subscribed": bool, "period": string, "next_billing": string? }
+      } else {
+        print("Failed to fetch subscription profile: ${response.statusCode} - ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching subscription profile: $e");
+      return null;
+    }
+  }
+  /// Cancel active subscription
+  /// POST /payment/cancel_subscription/ (no body required)
+  Future<bool> cancelSubscription() async {
+    try {
+      final token = box.read('loginToken');
+      if (token == null) {
+        print("No login token found - cannot cancel subscription");
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/payment/cancel_subscription/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: null  ← no payload, so we omit body completely
+      );
+
+      print("Cancel subscription response: ${response.statusCode}");
+      // print(response.body);   // uncomment only for debugging
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // 200 = success with body, 204 = success no content
+        return true;
+      } else {
+        print("Cancel failed: ${response.statusCode} → ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error cancelling subscription: $e");
+      return false;
+    }
+  }
 }

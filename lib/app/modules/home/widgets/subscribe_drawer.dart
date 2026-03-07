@@ -8,6 +8,7 @@ import 'package:Nuweli/app/res/fonts/fonts.dart';
 
 class ProfileDropdown extends StatelessWidget {
   final String userName;
+  final String  status;
   final String userImageUrl;
   final VoidCallback onProfileTap;
   final VoidCallback onMyListTap;
@@ -23,7 +24,7 @@ class ProfileDropdown extends StatelessWidget {
     required this.onMyListTap,
     required this.onWatchHistoryTap,
     required this.onUnsubscribeTap,
-    required this.oncollectiontap,
+    required this.oncollectiontap, required this.status,
   });
 
   @override
@@ -56,7 +57,7 @@ class ProfileDropdown extends StatelessWidget {
         PopupMenuItem(onTap: onWatchHistoryTap, child: _menuItem(ImageAssets.svg29, 'watch_history'.tr, 20)),
         PopupMenuItem(onTap: oncollectiontap, child: _menuItem(ImageAssets.svg31, 'collections'.tr, 20)),
         const PopupMenuDivider(color: AppColor.darkGray2),
-        PopupMenuItem(onTap: onUnsubscribeTap, child: _menuItem(ImageAssets.svg26, 'subscribe'.tr, 18, isDestructive: true)),
+        PopupMenuItem(onTap: onUnsubscribeTap, child: _menuItem(ImageAssets.svg26, status, 18, isDestructive: true)),
       ],
       child: ClipRRect(
         borderRadius: BorderRadius.circular(200.r),

@@ -26,7 +26,7 @@ import 'collections.dart';
 class HomePage extends StatelessWidget {
   final HomeController controller = Get.find();
   final NavController navController = Get.find();
-  final Settingcontroller settingcontroller  = Get.find();
+  final Settingcontroller settingcontroller = Get.find();
 
   HomePage({super.key});
 
@@ -35,29 +35,19 @@ class HomePage extends StatelessWidget {
     Moviepage(),
     Seriespage(),
     MusicVideo(),
-
   ];
 
-  final _titles = [
-    'Home',
-    'Movie',
-    'Series',
-    'Documentary',
-
-  ];
+  final _titles = ['Home', 'Movie', 'Series', 'Documentary'];
   final _icons = [
     ImageAssets.svg12,
     ImageAssets.svg8,
     ImageAssets.svg9,
     ImageAssets.svg10,
-
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-
       body: Obx(
         () => Stack(
           children: [
@@ -84,78 +74,107 @@ class HomePage extends StatelessWidget {
                               children: [
                                 IconButton(
                                   onPressed: () {
-
                                     navController.currentIndex.value++;
                                   },
-
-
 
                                   icon: Icon(
                                     CupertinoIcons.search,
                                     color: Colors.white,
                                   ),
                                 ),
-                                controller.issubscribed.value
-                                    ? GestureDetector(
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 10.w,
-                                            vertical: 5.h,
+                                Obx(() {
+                                  return settingcontroller.isSubscribed.value
+                                      ? ProfileDropdown(
+                                    status: settingcontroller.isSubscribed.value?'unsubscribe'.tr :'subscribe'.tr,
+                                          userName:
+                                              settingcontroller
+                                                  .firstName
+                                                  .value
+                                                  .isNotEmpty
+                                              ? "${settingcontroller.firstName.value} ${settingcontroller.lastName.value}"
+                                              : "User",
+                                          userImageUrl: settingcontroller
+                                              .profileImage
+                                              .value,
+                                          onProfileTap: () => Get.to(
+                                            ProfilePage(),
+                                            transition: Transition.rightToLeft,
                                           ),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              8.r,
-                                            ),
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                AppColor.vividAmber,
-                                                AppColor.sunnyYellow,
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
+                                          onMyListTap: () => Get.to(
+                                            Mylist(),
+                                            transition: Transition.rightToLeft,
                                           ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SvgPicture.asset(
-                                                ImageAssets.svg26,
-                                              ), // crown icon
-                                              SizedBox(width: 8.w),
-                                              Text(
-                                                "Subscribe",
-                                                style: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
+                                          onWatchHistoryTap: () async {
+                                            await controller
+                                                .fetchWatchhistoryData();
+                                            Get.to(
+                                              WatchHistory(),
+                                              transition:
+                                                  Transition.rightToLeft,
+                                            );
+                                          },
+                                          oncollectiontap: () async {
+                                            await controller
+                                                .fetchCollectionsData();
+                                            Get.to(
+                                              Collections(),
+                                              transition:
+                                                  Transition.rightToLeft,
+                                            );
+                                          },
+                                          onUnsubscribeTap: () {
+                                            Get.to(
+                                              Subscription(),
+                                              transition:
+                                                  Transition.rightToLeft,
+                                            );
+                                          },
+                                        )
+                                      : GestureDetector(
+                                          onTap: () {
+                                            Get.to(
+                                              Subscription(),
+                                              transition:
+                                                  Transition.rightToLeft,
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 10.w,
+                                              vertical: 5.h,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.r),
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  AppColor.vividAmber,
+                                                  AppColor.sunnyYellow,
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
                                               ),
-                                            ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SvgPicture.asset(
+                                                  ImageAssets.svg26,
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                Text(
+                                                  "Subscribe",
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-
-                                        ),
-                                  onTap: (){
-                                          Get.to(Subscription(),transition: Transition.rightToLeft);
-                                  },
-                                      )
-                                    : ProfileDropdown(
-                                  userName: settingcontroller.firstName.value.isNotEmpty
-                                  ?"${settingcontroller.firstName.value} ${settingcontroller.lastName.value} "
-                                  :"User",
-                                  userImageUrl: settingcontroller.profileImage.value,
-                                  onProfileTap: () => Get.to(ProfilePage(),transition: Transition.rightToLeft),
-                                  onMyListTap: () =>  Get.to(Mylist(),transition: Transition.rightToLeft),
-                                  onWatchHistoryTap: () async{
-                                    await controller.fetchWatchhistoryData();
-                                    Get.to(WatchHistory(),transition: Transition.rightToLeft);},
-
-                                  oncollectiontap: () async{
-                await controller.fetchCollectionsData();
-                Get.to(Collections(),transition: Transition.rightToLeft);},
-                                  onUnsubscribeTap: (){
-                            Get.to(Subscription(),transition: Transition.rightToLeft);
-                                  },
-                                ),
+                                        );
+                                }),
                               ],
                             ),
                           ],
@@ -334,6 +353,4 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-
 }

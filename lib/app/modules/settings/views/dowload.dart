@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Nuweli/app/modules/settings/controllers/settingcontroller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/Get.dart';
@@ -8,7 +9,8 @@ import '../../../res/colors/color.dart';
 import 'offlineplayer.dart';
 
 class DownloadsScreen extends StatefulWidget {
-  const DownloadsScreen({Key? key}) : super(key: key);
+  final Settingcontroller settingcontroller=Get.find();
+   DownloadsScreen({Key? key}) : super(key: key);
 
   @override
   State<DownloadsScreen> createState() => _DownloadsScreenState();
@@ -22,10 +24,13 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   @override
   void initState() {
     super.initState();
-    _loadDownloads();
+    _initializePage();
     _downloadManager.addDownloadEventListener(this);
   }
-
+  Future<void> _initializePage() async {
+    await widget.settingcontroller.fetchProfileData();
+    _loadDownloads();
+  }
   @override
   void dispose() {
     _downloadManager.removeDownloadEventListener(this);

@@ -67,6 +67,11 @@ Future<void> showNotification(RemoteMessage message) async {
 Future<void> initFCM() async {
   await initLocalNotifications();
   await FirebaseMessaging.instance.requestPermission(alert: true, badge: true, sound: true);
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
   final token = await FirebaseMessaging.instance.getToken();
   print("FCM Token: $token");

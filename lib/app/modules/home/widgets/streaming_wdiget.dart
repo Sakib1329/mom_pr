@@ -9,6 +9,7 @@ import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:Nuweli/app/res/fonts/fonts.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../models/movie_model.dart';
+import '../views/details.dart';
 import '../views/videoscreen.dart';
 
 class CategoryHomeWidget extends StatefulWidget {
@@ -34,7 +35,13 @@ class CategoryHomeWidget extends StatefulWidget {
 class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
   int _currentBannerIndex = 0;
   late List<String> bannerImages;
-  final customCacheManager = CacheManager(Config('customCacheKey', maxNrOfCacheObjects: 200, stalePeriod: const Duration(days: 30)));
+  final customCacheManager = CacheManager(
+    Config(
+      'customCacheKey',
+      maxNrOfCacheObjects: 200,
+      stalePeriod: const Duration(days: 30),
+    ),
+  );
 
   @override
   void initState() {
@@ -85,9 +92,9 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
-
               /// 1. CONTINUE WATCHING (NETFLIX STYLE)
-              if (widget.continueWatchingList.isNotEmpty) _buildContinueWatchingRow(),
+              if (widget.continueWatchingList.isNotEmpty)
+                _buildContinueWatchingRow(),
 
               /// 2. PREVIEWS
               if (widget.previewItems.isNotEmpty) _buildPreviewSection(),
@@ -96,7 +103,11 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
 
               /// 3. CATEGORIES
               for (var entry in widget.categoryImages.entries)
-                _buildCategory(entry.key.tr, entry.value, widget.homeController),
+                _buildCategory(
+                  entry.key.tr,
+                  entry.value,
+                  widget.homeController,
+                ),
 
               SizedBox(height: 20.h),
             ]),
@@ -121,33 +132,80 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
               right: 16.w,
               child: Row(
                 children: [
-                  Expanded(child: _buildBannerButton('watch_now'.tr, Colors.white, Colors.black, () {
-                    final d = _getBannerDetails();
-                    if (d != null) widget.homeController.fetchMovieDetails(d['id'], d['alias']);
-                  })),
+                  Expanded(
+                    child: _buildBannerButton(
+                      'watch_now'.tr,
+                      Colors.white,
+                      Colors.black,
+                      () {
+                        final d = _getBannerDetails();
+                        if (d != null) {
+                          Get.to(
+                                () => MovieDetailsPage(),
+                            transition: Transition.rightToLeftWithFade,
+                          );
+                          widget.homeController.fetchMovieDetails(
+                            d['id'],
+                            d['alias'],
+                          );
+                        }
+                      },
+                    ),
+                  ),
                   SizedBox(width: 8.w),
-                  Expanded(child: _buildBannerButton('my_list_banner'.tr, Colors.grey.withOpacity(0.8), Colors.white, () {})),
+                  Expanded(
+                    child: _buildBannerButton(
+                      'my_list_banner'.tr,
+                      Colors.grey.withOpacity(0.8),
+                      Colors.white,
+                      () {
+                        final d = _getBannerDetails();
+                        if (d != null) {
+                          widget.homeController.addToWatchLater(
+                            d['id'],
+                            d['alias'],
+                          );
+                        }
+                      },
+
+                    ),
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBannerButton(String text, Color bg, Color textCol, VoidCallback onTap) {
+  Widget _buildBannerButton(
+    String text,
+    Color bg,
+    Color textCol,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 40.h,
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8.r)),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
         alignment: Alignment.center,
-        child: Text(text, style: TextStyle(color: textCol, fontWeight: FontWeight.bold, fontSize: 12.sp)),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: textCol,
+            fontWeight: FontWeight.bold,
+            fontSize: 12.sp,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
-
   Widget _buildContinueWatchingRow() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +233,8 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
               final int percent = (movie.watchProgress * 100).toInt();
 
               return GestureDetector(
-                onTap: () => Get.to(() => VideoPlayerScreen(fileUuid: movie.fileUuid)),
+                onTap: () =>
+                    Get.to(() => VideoPlayerScreen(fileUuid: movie.fileUuid)),
                 child: Container(
                   width: 160.w,
 
@@ -206,9 +265,14 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 4.h,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7), // Darker background for readability
+                            color: Colors.black.withOpacity(
+                              0.7,
+                            ), // Darker background for readability
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(9.r),
                               bottomRight: Radius.circular(9.r),
@@ -226,11 +290,16 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
                                   ),
                                   child: FractionallySizedBox(
                                     alignment: Alignment.centerLeft,
-                                    widthFactor: movie.watchProgress.clamp(0.0, 1.0),
+                                    widthFactor: movie.watchProgress.clamp(
+                                      0.0,
+                                      1.0,
+                                    ),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: AppColor.vividAmber,
-                                        borderRadius: BorderRadius.circular(2.r),
+                                        borderRadius: BorderRadius.circular(
+                                          2.r,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -266,7 +335,13 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('previews'.tr, style: AppTextStyles.montserratBold.copyWith(fontSize: 20.sp, color: Colors.white)),
+        Text(
+          'previews'.tr,
+          style: AppTextStyles.montserratBold.copyWith(
+            fontSize: 20.sp,
+            color: Colors.white,
+          ),
+        ),
         SizedBox(height: 10.h),
         SizedBox(
           height: 100.h,
@@ -277,19 +352,29 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
             itemBuilder: (context, index) {
               final item = widget.previewItems[index];
               return GestureDetector(
-                onTap: () => widget.homeController.fetchMovieDetails(item['id'], item['alias']),
-                child:Container(
+                onTap: () {
+                  Get.to(
+                        () => MovieDetailsPage(),
+                    transition: Transition.rightToLeftWithFade,
+                  );
+                  widget.homeController.fetchMovieDetails(
+                    item['id'],
+                    item['alias'],
+                  );
+
+
+                },
+                child: Container(
                   width: 100.r,
                   height: 120.r,
                   decoration: BoxDecoration(
-                   borderRadius: BorderRadius.circular(20.r),
+                    borderRadius: BorderRadius.circular(20.r),
                     image: DecorationImage(
                       image: CachedNetworkImageProvider(item['poster']),
                       fit: BoxFit.cover,
                     ),
                   ),
-                )
-
+                ),
               );
             },
           ),
@@ -298,13 +383,23 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
     );
   }
 
-  Widget _buildCategory(String title, List<Map<String, dynamic>> items, HomeController homeController) {
+  Widget _buildCategory(
+    String title,
+    List<Map<String, dynamic>> items,
+    HomeController homeController,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTextStyles.montserratBold.copyWith(fontSize: 16.sp, color: Colors.white)),
+          Text(
+            title,
+            style: AppTextStyles.montserratBold.copyWith(
+              fontSize: 16.sp,
+              color: Colors.white,
+            ),
+          ),
           SizedBox(height: 8.h),
           SizedBox(
             height: 140.h,
@@ -315,10 +410,21 @@ class _CategoryHomeWidgetState extends State<CategoryHomeWidget> {
               itemBuilder: (context, index) {
                 final item = items[index];
                 return GestureDetector(
-                  onTap: () => homeController.fetchMovieDetails(item['id'], item['alias']),
+                  onTap: () {
+                    Get.to(
+                      () => MovieDetailsPage(),
+                      transition: Transition.rightToLeftWithFade,
+                    );
+                    homeController.fetchMovieDetails(item['id'], item['alias']);
+                  },
+
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12.r),
-                    child: CachedNetworkImage(imageUrl: item['poster'], width: 97.w, fit: BoxFit.cover),
+                    child: CachedNetworkImage(
+                      imageUrl: item['poster'],
+                      width: 97.w,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 );
               },

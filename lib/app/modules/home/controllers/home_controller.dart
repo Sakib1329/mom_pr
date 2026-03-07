@@ -19,7 +19,7 @@ class HomeController extends GetxController {
   final NavController _navController = Get.find<NavController>();
 
   var currentIndex = 0.obs;
-  RxBool issubscribed = false.obs;
+
   var selectedSeasonIndex = 0.obs;
 
   // Search
@@ -168,7 +168,7 @@ class HomeController extends GetxController {
       detailsErrorMessage('');
       final details = await HomeService.getMovieDetails(id, aliastype);
       movieDetails.value = details;
-      Get.to(() => MovieDetailsPage(), transition: Transition.rightToLeftWithFade);
+
     } catch (e) {
       detailsErrorMessage('Failed to load movie details: $e');
     } finally {

@@ -88,6 +88,7 @@ class AuthProvider {
     }
   }
 
+
   Future<bool> activateAccount(String email, String otp) async {
     try {
       final response = await http.post(

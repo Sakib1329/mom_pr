@@ -422,8 +422,7 @@ print(response.statusCode);
         },
       );
 
-      print('Series by genre ($genreSlug) response: ${response.body}');
-      print('Series by genre status: ${response.statusCode}');
+
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body)['data'];

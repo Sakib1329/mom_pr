@@ -49,7 +49,6 @@ Future<void> main() async {
     }
   });
 
-  // ───── WHEN USER TAPS NOTIFICATION (app closed or background) ─────
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     print("NOTIFICATION TAPPED → Opening app with data: ${message.data}");
     if (message.data.isNotEmpty) {
@@ -75,14 +74,13 @@ class MyApp extends StatelessWidget {
           FocusManager.instance.primaryFocus?.unfocus();
 
         },
-
         child: GetMaterialApp(
           debugShowCheckedModeBanner: false,
           translations: AppTranslations(),
           title: "Nuweli",
           home: const SplashView(),
           initialBinding: InitialBinding(),
-          locale: const Locale('en', 'US'),
+          locale: Get.deviceLocale,
           fallbackLocale: const Locale('en', 'US'),
           theme: ThemeData(
             scaffoldBackgroundColor: AppColor.background,

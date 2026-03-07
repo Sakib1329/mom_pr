@@ -1,3 +1,4 @@
+import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,7 +16,7 @@ class Mylist extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomeController homeController = Get.find<HomeController>();
-
+     homeController.fetchWatchLaterData();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp), onPressed: () => Navigator.pop(context)),
@@ -23,7 +24,7 @@ class Mylist extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
-        if (homeController.isWatchLaterLoading.value) return const Center(child: CircularProgressIndicator());
+        if (homeController.isWatchLaterLoading.value) return const Center(child: CircularProgressIndicator(color: AppColor.vividAmber,));
         if (homeController.watchLaterErrorMessage.isNotEmpty) return Center(child: Text(homeController.watchLaterErrorMessage.value, style: TextStyle(color: Colors.white, fontSize: 16.sp)));
         if (homeController.watchLaterItems.isEmpty) return Center(child: Text('no_items_watch_later'.tr, style: TextStyle(color: Colors.white, fontSize: 16.sp)));
         return SingleChildScrollView(

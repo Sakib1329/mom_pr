@@ -10,6 +10,8 @@ class Privacypolicy extends StatelessWidget {
   final Settingcontroller controller = Get.find();
   Privacypolicy({super.key});
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

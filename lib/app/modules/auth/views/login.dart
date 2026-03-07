@@ -234,13 +234,18 @@ class Login extends StatelessWidget {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(15.w),
-                      decoration: BoxDecoration(
-                        color: AppColor.customDarkGray2,
-                        borderRadius: BorderRadius.circular(7.r),
+                    child: GestureDetector(
+                      onTap: ()async{
+                    await controller.signInWithApple();
+                    },
+                      child: Container(
+                        padding: EdgeInsets.all(15.w),
+                        decoration: BoxDecoration(
+                          color: AppColor.customDarkGray2,
+                          borderRadius: BorderRadius.circular(7.r),
+                        ),
+                        child: SvgPicture.asset(ImageAssets.svg16),
                       ),
-                      child: SvgPicture.asset(ImageAssets.svg16),
                     ),
                   ),
                 ],

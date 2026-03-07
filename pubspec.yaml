@@ -43,6 +43,9 @@ dependencies:
   firebase_analytics: ^11.6.0
   google_nav_bar: ^5.0.7
   rename: ^3.1.0
+  chewie: ^1.13.0
+  sign_in_with_apple: ^7.0.1
+  firebase_auth: ^5.7.0
 
 dev_dependencies:
   flutter_test:
@@ -74,3 +77,6 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/logo1.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background_ios: true
+  remove_alpha_ios: true

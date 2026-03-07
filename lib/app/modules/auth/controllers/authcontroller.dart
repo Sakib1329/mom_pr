@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -9,8 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:Nuweli/app/bindings/initialbindings.dart';
 import 'package:Nuweli/app/services/push_notification.dart';
 import 'package:Nuweli/app/modules/auth/views/verifiedpage.dart';
-import 'package:Nuweli/app/modules/home/views/home.dart';
 import 'package:Nuweli/app/modules/home/views/navbar.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../constants/appconstant.dart';
 import '../../../res/colors/color.dart';
@@ -25,7 +26,6 @@ import '../api_services/api_services.dart';
 import '../models/login_model.dart';
 import '../models/signup_models.dart';
 import '../views/changepass.dart';
-import '../views/login.dart';
 import '../views/otp.dart';
 
 class Authcontroller extends GetxController {
@@ -174,7 +174,68 @@ class Authcontroller extends GetxController {
       isloadinggmail.value = false;
     }
   }
+  Future<void> signInWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
 
+      final oauthCredential = fb.OAuthProvider("apple.com").credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      await fb.FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      final email = credential.email ?? '';
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/apple_login/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email, "login_secret": "^sa@!24l425\$fZa#32f|\$"}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final box = GetStorage();
+        if (data['refresh'] != null) box.write('refreshToken', data['refresh']);
+        if (data['access'] != null) box.write('loginToken', data['access']);
+
+        Get.snackbar(
+          'Success',
+          'google_login_success'.tr,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColor.vividAmber,
+          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        );
+
+        Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
+          Get.delete<Authcontroller>(force: true);
+          Get.delete<HomeController>(force: true);
+          Get.delete<NavController>(force: true);
+          Get.delete<OnboardController>(force: true);
+          Get.delete<BottomSheetController>(force: true);
+          Get.delete<Settingcontroller>(force: true);
+          Get.delete<ComingSoonController>(force: true);
+          InitialBinding().dependencies();
+        }), transition: Transition.rightToLeft);
+      } else {
+        Get.snackbar(
+          'Error',
+          '${'Apple Sign in Failed'}: ${response.body}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          messageText: Text('${"Apple Sign in Failed"}: ${response.body}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        ); }
+    } catch (e) {
+      print(e.toString());
+      Get.snackbar('Error', e.toString(),backgroundColor: Colors.white);
+    }
+  }
   Future<void> login() async {
     try {
       _validateInputs(isLogin: true);
@@ -211,8 +272,9 @@ class Authcontroller extends GetxController {
           Get.delete<ComingSoonController>(force: true);
           InitialBinding().dependencies();
         }), transition: Transition.rightToLeft);
-
+        print("done");
         await initFCM();
+
       } else {
         throw 'login_timed_out'.tr;
       }
@@ -220,7 +282,7 @@ class Authcontroller extends GetxController {
       Get.snackbar(
         'Error',
         e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
+        backgroundColor: AppColor.vividAmber,
         snackPosition: SnackPosition.TOP,
         titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
         messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),

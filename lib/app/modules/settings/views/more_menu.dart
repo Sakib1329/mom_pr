@@ -127,7 +127,7 @@ class MoreMenu extends StatelessWidget {
                   SizedBox(height: 12.h),
                   GestureDetector(
                     onTap: () {
-                      settingcontroller.loadPrivacyPolicy();
+
                       Get.to(Privacypolicy(), transition: Transition.rightToLeft);
                     },
                     child: Text(
@@ -224,7 +224,7 @@ class MoreMenu extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () async {
-                        await controller.fetchWatchLaterData();
+
                         Get.to(Mylist(), transition: Transition.rightToLeft);
                       },
                       child: Row(
@@ -246,8 +246,8 @@ class MoreMenu extends StatelessWidget {
                     _MenuItem(
                       icon: Icons.download,
                       title: 'downloads'.tr,
-                      onTap: () async {
-                        await settingcontroller.fetchProfileData();
+                      onTap: ()  {
+
                         Get.to(DownloadsScreen(), transition: Transition.rightToLeft);
                       },
                     ),

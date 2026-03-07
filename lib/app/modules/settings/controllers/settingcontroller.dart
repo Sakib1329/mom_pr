@@ -54,13 +54,17 @@ class Settingcontroller extends GetxController {
 
   var selectedGender = RxnString();
 
-  final ImagePicker _picker = ImagePicker();
+//paymentstatus
+  var isSubscribed = false.obs;
+  var subPeriod     = ''.obs;   // "monthly" or "yearly"
+  var nextBilling   = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     loadPrivacyPolicy();
     fetchProfileData();
+    fetchSubscriptionStatus();
     deleteConfirmController.addListener(() {
       deleteConfirmText.value = deleteConfirmController.text;
     });
@@ -240,12 +244,6 @@ class Settingcontroller extends GetxController {
   /// 🔹 Subscription Plan Selection
   void selectPlan(int index) => selectedPlan.value = index;
 
-  /// 🔹 Subscribe (temporary demo)
-  void subscribe() {
-    final planName = selectedPlan.value == 0 ? "3 Months" : "12 Months";
-    Get.snackbar("Subscription", "Selected plan: $planName",
-        snackPosition: SnackPosition.BOTTOM);
-  }
 
   /// 🔹 Initiate Payment
   Future<void> initiatePayment({
@@ -297,6 +295,7 @@ class Settingcontroller extends GetxController {
           colorText: Colors.white,
         );
       }
+
     } catch (e) {
 
       Get.snackbar(
@@ -308,6 +307,7 @@ class Settingcontroller extends GetxController {
 
     } finally {
       isLoading.value = false;
+      await fetchSubscriptionStatus();
     }
   }
 
@@ -323,25 +323,83 @@ class Settingcontroller extends GetxController {
       moncashMonthly.value = (data['moncash']['monthly'] ?? 0).toDouble();
       moncashYearly.value = (data['moncash']['yearly'] ?? 0).toDouble();
     } catch (e) {
+  print(e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  Future<void> fetchSubscriptionStatus() async {
+    try {
+      isLoading.value = true;
+
+      final data = await _settingService.fetchSubscriptionProfile();
+
+      if (data != null) {
+        isSubscribed.value = data['is_subscribed'] == true;
+        subPeriod.value    = (data['period'] ?? '').toLowerCase();
+        nextBilling.value  = data['next_billing'] ?? '';
+      } else {
+        isSubscribed.value = false;
+        subPeriod.value    = '';
+        nextBilling.value  = '';
+        await fetchSubscriptionPrices();
+      }
+    } catch (e) {
+      print("fetchSubscriptionStatus error: $e");
+      isSubscribed.value = false;
+    }
+     finally {
+      isLoading.value = false;
+     }
+  }
+
+  Future<void> cancelCurrentSubscription() async {
+    try {
+      isLoading.value = true;
+
+      final success = await _settingService.cancelSubscription();
+
+      if (success) {
+        Get.snackbar(
+          'Success',
+          'Subscription cancelled successfully',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+        );
+
+        // Refresh subscription status to update UI immediately
+        await fetchSubscriptionStatus();
+
+        // Optional: refresh profile if subscription affects other data
+        // await fetchProfileData();
+      } else {
+        Get.snackbar(
+          'Failed',
+          'Could not cancel subscription. Please try again later.',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
       Get.snackbar(
         'Error',
-        e.toString(),
+        'Something went wrong: $e',
         backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
     } finally {
       isLoading.value = false;
     }
   }
-
   /// 🔹 Sign out user
   Future<void> signOut() async {
     final box = GetStorage();
+    Get.offAll(() => Login(), transition: Transition.rightToLeft);
     await unregister();
     await box.remove('loginToken');
     await box.remove('refreshToken');
 
-    Get.offAll(() => Login(), transition: Transition.rightToLeft);
+
 
     Get.snackbar(
       'Success',

@@ -1,5 +1,6 @@
 // lib/services/notification_service.dart
 import 'dart:convert';
+import 'dart:io';
 import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -72,8 +73,9 @@ Future<void> showRichNotification(Map<String, dynamic> data, {required bool isBa
   // ------------------------------------------------------------
   BigPictureStyleInformation? bigPic;
 
-  if (posterUrl != null && posterUrl.startsWith("http")) {
+  if (Platform.isAndroid && posterUrl != null && posterUrl.startsWith("http")) {
     try {
+      print("$prefix → Attempting to download poster for Android big picture");
       final r = await http.get(Uri.parse(posterUrl)).timeout(const Duration(seconds: 10));
 
       if (r.statusCode == 200 && r.bodyBytes.isNotEmpty) {
@@ -81,19 +83,21 @@ Future<void> showRichNotification(Map<String, dynamic> data, {required bool isBa
 
         bigPic = BigPictureStyleInformation(
           bitmap,
-          largeIcon: bitmap,
+          largeIcon: bitmap,  // Optional: also as large icon
           contentTitle: '<b>$title</b>',
           htmlFormatContentTitle: true,
           summaryText: body,
         );
+        print("$prefix → Big picture prepared for Android");
       } else {
         print("$prefix → POSTER FETCH FAILED (${r.statusCode})");
       }
     } catch (e) {
       print("$prefix → POSTER DOWNLOAD ERROR: $e");
     }
+  } else if (Platform.isIOS && posterUrl != null) {
+    print("$prefix → iOS: Big picture not supported by flutter_local_notifications (text-only notification)");
   }
-
   // ------------------------------------------------------------
   // Notification Channel
   // ------------------------------------------------------------

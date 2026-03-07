@@ -184,7 +184,7 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
   // Trailer functions
   Future<void> _initTrailer() async {
     if (_trailerController != null || !_hasTrailer) return;
-
+    print("Trailer URL: ${widget.movie.trailer}");
     setState(() => _isLoadingTrailer = true);
 
     try {
@@ -210,6 +210,7 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
           _isLoadingTrailer = false;
           _trailerInitialized = false;
         });
+        print(e.toString());
         Get.snackbar('trailer_error'.tr, e.toString(),
             backgroundColor: Colors.red, colorText: Colors.white);
       }
@@ -306,6 +307,7 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
             (vdoError) {
           if (mounted) {
             setState(() => _isDownloading = false);
+            print(vdoError.message);
             Get.snackbar(
               'download_error'.tr,
               vdoError.message ?? 'Unknown error',
@@ -700,7 +702,7 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
                       gradient: const LinearGradient(
                           colors: [Colors.orange, Colors.yellowAccent]),
                       width: double.infinity,
-                      height: 35.h,
+                      height: 32.h,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                     ),
