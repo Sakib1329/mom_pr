@@ -30,11 +30,17 @@ class AuthProvider {
         if (refresh != null) box.write('refreshToken', refresh);
         return true;
       }
-      print('Login failed: ${response.body}');
-      return false;
+      String errorMessage = 'Login failed';
+      try {
+        final errorData = jsonDecode(response.body);
+        if (errorData is Map && errorData.containsKey('detail')) {
+          errorMessage = errorData['detail'];
+        }
+      } catch (_) {}
+      throw errorMessage;
     } catch (e) {
       print('Login error: $e');
-      return false;
+      rethrow;
     }
   }
 

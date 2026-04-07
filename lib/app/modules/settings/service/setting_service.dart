@@ -285,6 +285,37 @@ print(response.body);
       return null;
     }
   }
+  /// Get login token for website redirect
+  /// GET /auth/get_login_token/
+  Future<String?> getLoginToken() async {
+    try {
+      final token = box.read('loginToken');
+      if (token == null) {
+        print("No login token found for getLoginToken");
+        return null;
+      }
+
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/auth/get_login_token/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['token']?.toString();
+      } else {
+        print("Failed to get login token: ${response.statusCode} - ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Error getting login token: $e");
+      return null;
+    }
+  }
+
   /// Cancel active subscription
   /// POST /payment/cancel_subscription/ (no body required)
   Future<bool> cancelSubscription() async {

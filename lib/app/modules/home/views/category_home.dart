@@ -5,6 +5,7 @@ import 'package:Nuweli/app/res/assets/imageassets.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/streaming_wdiget.dart';
 import '../models/movie_model.dart';
+import '../../../utils/display_error_widget.dart';
 
 class CategoryHome extends StatelessWidget {
   const CategoryHome({super.key});
@@ -22,12 +23,7 @@ class CategoryHome extends StatelessWidget {
         );
       }
       if (homeController.allContentErrorMessage.isNotEmpty) {
-        return Center(
-          child: Text(
-            homeController.allContentErrorMessage.value,
-            style: TextStyle(color: Colors.white, fontSize: 16.sp),
-          ),
-        );
+        return DisplayErrorWidget(errorMessage: homeController.allContentErrorMessage.value);
       }
       if (homeController.allContentResponse.value == null) {
         return Center(

@@ -5,7 +5,9 @@ import 'package:Nuweli/app/modules/home/controllers/home_controller.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../models/movie_model.dart';
+import '../models/movie_model.dart';
 import '../models/series_model.dart';
+import '../../../utils/display_error_widget.dart';
 
 class SearchScreen extends StatelessWidget {
   final HomeController controller = Get.find();
@@ -76,15 +78,7 @@ class SearchScreen extends StatelessWidget {
               child: Obx(() => controller.isLoading.value
                   ? const Center(child: CircularProgressIndicator(color: Colors.white))
                   : controller.errorMessage.isNotEmpty
-                  ? Center(
-                child: Text(
-                  controller.errorMessage.value,
-                  style: AppTextStyles.montserratRegular.copyWith(
-                    color: Colors.white,
-                    fontSize: 16.sp,
-                  ),
-                ),
-              )
+                  ? DisplayErrorWidget(errorMessage: controller.errorMessage.value)
                   : controller.items.isEmpty
                   ? Center(
                 child: Text(

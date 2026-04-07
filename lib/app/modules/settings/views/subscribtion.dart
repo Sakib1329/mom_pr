@@ -73,7 +73,7 @@ class _SubscriptionState extends State<Subscription> {
                     SizedBox(height: 36.h),
                     Center(
                       child: Text(
-                        isSubscribed ? 'your_subscription'.tr : 'choose_plan'.tr,
+                        isSubscribed ? 'your_subscription'.tr : 'our_plans'.tr,
                         style: AppTextStyles.montserratSemiBold.copyWith(
                           color: AppColor.translucentWhite,
                           fontSize: 18.sp,
@@ -104,38 +104,18 @@ class _SubscriptionState extends State<Subscription> {
                     if (isSubscribed)
                       _buildSubscribedPlanCard()
                     else ...[
-                      _buildPlanCard(
-                        title: "Subscription",
+                      _buildPlanCardViewOnly(
+                        title: "Standard",
                         subtitle: 'monthly_sub'.tr,
                         price: "\$${controller.moncashMonthly.value}",
-                        isSelected: controller.selectedPlan.value == 0,
-                        onTap: () => controller.selectPlan(0),
+                        isHighlighted: true,
                       ),
                       SizedBox(height: 14.4.h),
-                      _buildPlanCard(
+                      _buildPlanCardViewOnly(
                         title: "Premium",
                         subtitle: 'yearly_sub'.tr,
                         price: "\$${controller.moncashYearly.value}",
-                        isSelected: controller.selectedPlan.value == 1,
-                        onTap: () => controller.selectPlan(1),
-                      ),
-                      SizedBox(height: 21.6.h),
-                      Row(
-                        children: [
-                          SvgPicture.asset(ImageAssets.svg25),
-                          SizedBox(width: 7.2.w),
-                          GestureDetector(
-                            onTap: () => Get.snackbar("Redeem", "Redeem code feature is temporarily unavailable. Please try again later.",backgroundColor: Colors.white),
-                            child: Text(
-                              'have_redeem_code'.tr,
-                              style: AppTextStyles.montserratSemiBold.copyWith(
-                                color: AppColor.white,
-                                fontSize: 12.sp,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
+                        isHighlighted: false,
                       ),
                       const Spacer(),
                     ],
@@ -157,8 +137,8 @@ class _SubscriptionState extends State<Subscription> {
                       )
                     else
                       CustomButton(
-                        onPress: () async => _showPaymentBottomSheet(context, controller),
-                        title: 'subscribe_btn'.tr,
+                        onPress: () async => controller.redirectToWebSubscription(),
+                        title: 'Upgrade Plan'.tr,
                         textColor: Colors.black,
                         gradient: LinearGradient(
                           colors: [AppColor.vividAmber, AppColor.sunnyYellow],
@@ -212,75 +192,61 @@ class _SubscriptionState extends State<Subscription> {
     );
   }
 
-  Widget _buildPlanCard({
+  /// View-only plan card — no selection, no radio buttons
+  Widget _buildPlanCardViewOnly({
     required String title,
     required String subtitle,
     required String price,
-    required bool isSelected,
-    required VoidCallback onTap,
+    required bool isHighlighted,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(18.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15.r),
-
-          gradient: isSelected
-              ? LinearGradient(
-              colors: [AppColor.vividAmber, AppColor.sunnyYellow],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight)
-              : null,
-          border: Border.all(
-            color: isSelected ? Colors.transparent : Colors.white24,
-            width: 1.5,
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15.r),
+        gradient: isHighlighted
+            ? LinearGradient(
+                colors: [AppColor.vividAmber, AppColor.sunnyYellow],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight)
+            : null,
+        border: Border.all(
+          color: isHighlighted ? Colors.transparent : AppColor.vividAmber,
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.montserratSemiBold.copyWith(
+                  color: isHighlighted ? Colors.black87 : Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                subtitle,
+                style: AppTextStyles.montserratSemiBold.copyWith(
+                  color: isHighlighted ? Colors.black54 : Colors.white70,
+                  fontSize: 12.sp,
+                ),
+              ),
+            ],
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.montserratSemiBold.copyWith(
-                    color: isSelected ? Colors.black87 : Colors.white,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  subtitle,
-                  style: AppTextStyles.montserratSemiBold.copyWith(
-                    color: isSelected ? Colors.black54 : Colors.white70,
-                    fontSize: 12.sp,
-                  ),
-                ),
-              ],
+          Text(
+            price,
+            style: AppTextStyles.montserratSemiBold.copyWith(
+              color: isHighlighted ? Colors.black : Colors.white,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
             ),
-            Row(
-              children: [
-                Text(
-                  price,
-                  style: AppTextStyles.montserratSemiBold.copyWith(
-                    color: isSelected ? Colors.black : Colors.white,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Icon(
-                  isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                  color: isSelected ? Colors.black : Colors.white38,
-                  size: 20.sp,
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -470,76 +436,6 @@ class _SubscriptionState extends State<Subscription> {
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-    );
-  }
-
-  void _showPaymentBottomSheet(BuildContext context, Settingcontroller controller) {
-    final paymentMethods = ['international'.tr, 'local_moncash'.tr];
-    final RxString selectedMethod = paymentMethods[0].obs;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.black87,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
-      builder: (_) => Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Obx(() => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'choose_payment_method'.tr,
-              style: AppTextStyles.montserratSemiBold.copyWith(color: Colors.white, fontSize: 18.sp),
-            ),
-            SizedBox(height: 20.h),
-            ...paymentMethods.map((method) {
-              bool isSelected = selectedMethod.value == method;
-              return GestureDetector(
-                onTap: () => selectedMethod.value = method,
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 6.h),
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white12 : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected ? AppColor.vividAmber : Colors.white38,
-                        size: 20.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        method,
-                        style: AppTextStyles.montserratSemiBold.copyWith(color: Colors.white, fontSize: 14.sp),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-            SizedBox(height: 20.h),
-            CustomButton(
-              title: 'continue'.tr,
-              loading: controller.isLoading.value,
-              onPress: () async {
-                final period = controller.selectedPlan.value == 0 ? "monthly" : "yearly";
-                await controller.paySubscription(
-                  period: period,
-                  isMonCash: selectedMethod.value == 'local_moncash'.tr,
-                );
-              },
-              gradient: LinearGradient(colors: [Colors.orange, Colors.yellowAccent]),
-              width: double.infinity,
-              height: 30.h,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            SizedBox(height: 15.h),
-          ],
-        )),
-      ),
     );
   }
 }

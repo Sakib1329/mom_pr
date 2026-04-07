@@ -7,6 +7,7 @@ import '../../../res/fonts/fonts.dart';
 import '../controllers/comingsoon_controller.dart';
 import '../widgets/moviecard_widget.dart';
 import '../widgets/notification_card.dart';
+import '../../../utils/display_error_widget.dart';
 
 class ComingSoon extends StatelessWidget {
   const ComingSoon({super.key});
@@ -43,7 +44,7 @@ class ComingSoon extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (controller.error.value.isNotEmpty) {
-                  return Center(child: Text(controller.error.value));
+                  return DisplayErrorWidget(errorMessage: controller.error.value);
                 }
                 if (controller.items.isEmpty) {
                   return Center(child: Text('no_upcoming_content'.tr));

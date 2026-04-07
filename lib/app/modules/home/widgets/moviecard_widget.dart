@@ -5,6 +5,7 @@ import 'package:vdocipher_flutter/vdocipher_flutter.dart';
 import 'package:Nuweli/app/res/colors/color.dart';
 import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../services/home_service.dart';
+import '../../../utils/error_helper.dart';
 
 class MovieCardWidget extends StatefulWidget {
   final String title;
@@ -63,7 +64,7 @@ class _MovieCardWidgetState extends State<MovieCardWidget> {
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = isOfflineError(e) ? '🌐 No internet connection' : cleanErrorMessage(e);
         _isLoading = false;
       });
     }

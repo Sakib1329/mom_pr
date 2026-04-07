@@ -10,6 +10,7 @@ import '../../../res/fonts/fonts.dart';
 import '../../../widgets/custom_button.dart';
 import '../models/series_model.dart';
 import '../../settings/controllers/settingcontroller.dart';
+import 'package:toastification/toastification.dart';
 import '../views/videoscreen.dart';
 
 class SeriesDetailsWidget extends StatelessWidget {
@@ -102,7 +103,7 @@ class SeriesDetailsWidget extends StatelessWidget {
                           final episode = series.seasons[homeController.selectedSeasonIndex.value].episodes[0];
                           Get.to(() => VideoPlayerScreen(fileUuid: episode.fileUuid), transition: Transition.rightToLeftWithFade);
                         } else {
-                          Get.snackbar('Error', 'no_episodes'.tr, backgroundColor: Colors.redAccent, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+                          toastification.show(title: const Text('Error'), description: Text('no_episodes'.tr), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
                         }
                       },
                       child: Container(

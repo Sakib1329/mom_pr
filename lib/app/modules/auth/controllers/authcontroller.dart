@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:toastification/toastification.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
@@ -27,6 +28,7 @@ import '../models/login_model.dart';
 import '../models/signup_models.dart';
 import '../views/changepass.dart';
 import '../views/otp.dart';
+import '../../../utils/error_helper.dart';
 
 class Authcontroller extends GetxController {
   RxBool ischecked = false.obs;
@@ -106,13 +108,11 @@ class Authcontroller extends GetxController {
     try {
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account == null) {
-        Get.snackbar(
-          'google_login_cancelled'.tr,
-          'google_login_cancelled_msg'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          titleText: Text('google_login_cancelled'.tr, style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('google_login_cancelled_msg'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('google_login_cancelled'.tr, style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('google_login_cancelled_msg'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error,
+          autoCloseDuration: const Duration(seconds: 3),
         );
         return;
       }
@@ -132,13 +132,11 @@ class Authcontroller extends GetxController {
         if (data['refresh'] != null) box.write('refreshToken', data['refresh']);
         if (data['access'] != null) box.write('loginToken', data['access']);
 
-        Get.snackbar(
-          'Success',
-          'google_login_success'.tr,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: AppColor.vividAmber,
-          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.success,
+          autoCloseDuration: const Duration(seconds: 3),
         );
 
         Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
@@ -152,24 +150,23 @@ class Authcontroller extends GetxController {
           InitialBinding().dependencies();
         }), transition: Transition.rightToLeft);
       } else {
-        Get.snackbar(
-          'Error',
-          '${'google_login_failed'.tr}: ${response.body}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('${'google_login_failed'.tr}: ${response.body}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('HTTP ${response.statusCode}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error,
+          autoCloseDuration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Exception',
-        'An error occurred: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        titleText: Text('Exception', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-        messageText: Text('An error occurred: $e', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
-      );
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(
+          title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error,
+          autoCloseDuration: const Duration(seconds: 3),
+        );
+      }
     } finally {
       isloadinggmail.value = false;
     }
@@ -203,13 +200,11 @@ class Authcontroller extends GetxController {
         if (data['refresh'] != null) box.write('refreshToken', data['refresh']);
         if (data['access'] != null) box.write('loginToken', data['access']);
 
-        Get.snackbar(
-          'Success',
-          'google_login_success'.tr,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: AppColor.vividAmber,
-          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('google_login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.success,
+          autoCloseDuration: const Duration(seconds: 3),
         );
 
         Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
@@ -223,17 +218,17 @@ class Authcontroller extends GetxController {
           InitialBinding().dependencies();
         }), transition: Transition.rightToLeft);
       } else {
-        Get.snackbar(
-          'Error',
-          '${'Apple Sign in Failed'}: ${response.body}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('${"Apple Sign in Failed"}: ${response.body}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('HTTP ${response.statusCode}', style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error,
+          autoCloseDuration: const Duration(seconds: 3),
         ); }
     } catch (e) {
-      print(e.toString());
-      Get.snackbar('Error', e.toString(),backgroundColor: Colors.white);
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(title: const Text('Error'), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+      }
     }
   }
   Future<void> login() async {
@@ -253,13 +248,11 @@ class Authcontroller extends GetxController {
           storage.remove('password');
         }
 
-        Get.snackbar(
-          'Success',
-          'login_success'.tr,
-          backgroundColor: AppColor.vividAmber,
-          snackPosition: SnackPosition.TOP,
-          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('login_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.success,
+          autoCloseDuration: const Duration(seconds: 3),
         );
 
         Get.offAll(() => Navbar(), binding: BindingsBuilder(() {
@@ -279,13 +272,12 @@ class Authcontroller extends GetxController {
         throw 'login_timed_out'.tr;
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.vividAmber,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-        messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+      final msg = cleanErrorMessage(e);
+      toastification.show(
+        title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
       );
     } finally {
       isLoading.value = false;
@@ -309,26 +301,23 @@ class Authcontroller extends GetxController {
 
       if (success) {
         registeredEmail = newuser.email;
-        Get.snackbar(
-          'Success',
-          'otp_sent_success'.tr,
-          backgroundColor: AppColor.customDodgerBlue,
-          snackPosition: SnackPosition.TOP,
-          titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('otp_sent_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        toastification.show(
+          title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('otp_sent_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.success,
+          autoCloseDuration: const Duration(seconds: 3),
         );
         Get.offAll(Otpverifications(email: emailController.text.trim(), fromPage: frompage.value));
       } else {
         throw 'registration_failed'.tr;
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        e.toString(),
-        backgroundColor: AppColor.customDodgerBlue,
-        snackPosition: SnackPosition.TOP,
-        titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-        messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+      final msg = cleanErrorMessage(e);
+      toastification.show(
+        title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
       );
     } finally {
       isLoadingsignup.value = false;
@@ -337,9 +326,9 @@ class Authcontroller extends GetxController {
 
   Future<void> activateAccount(String otp) async {
     if (otp.length != 4) {
-      Get.snackbar('Error', 'invalid_otp'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text('invalid_otp'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+      toastification.show(title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text('invalid_otp'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
       return;
     }
 
@@ -350,9 +339,9 @@ class Authcontroller extends GetxController {
       if (frompage.value == "signup") {
         success = await _authProvider.activateAccount(registeredEmail, otp);
         if (success) {
-          Get.snackbar('Success', 'account_activated'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-              titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-              messageText: Text('account_activated'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+          toastification.show(title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+              description: Text('account_activated'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+              style: ToastificationStyle.fillColored, type: ToastificationType.success, autoCloseDuration: const Duration(seconds: 3));
           Get.offAll(() => Verifiedpage(page: frompage.value));
         } else {
           throw 'activation_failed'.tr;
@@ -360,18 +349,19 @@ class Authcontroller extends GetxController {
       } else {
         success = await _authProvider.otpActivate(registeredEmail, otp);
         if (success) {
-          Get.snackbar('Success', 'password_reset_success'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-              titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-              messageText: Text('password_reset_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+          toastification.show(title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+              description: Text('password_reset_success'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+              style: ToastificationStyle.fillColored, type: ToastificationType.success, autoCloseDuration: const Duration(seconds: 3));
           Get.offAll(Changepass(), transition: Transition.rightToLeft);
         } else {
           throw 'activation_failed'.tr;
         }
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+      final msg = cleanErrorMessage(e);
+      toastification.show(title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
     } finally {
       isLoadingverify.value = false;
     }
@@ -382,16 +372,17 @@ class Authcontroller extends GetxController {
       isLoadingresend.value = true;
       final success = await _authProvider.resendOtp(registeredEmail);
       if (success) {
-        Get.snackbar('OTP Sent', 'otp_resent'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-            titleText: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-            messageText: Text('otp_resent'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+        toastification.show(title: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            description: Text('otp_resent'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+            style: ToastificationStyle.fillColored, type: ToastificationType.info, autoCloseDuration: const Duration(seconds: 3));
       } else {
         throw 'resend_failed'.tr;
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+      final msg = cleanErrorMessage(e);
+      toastification.show(title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
     } finally {
       isLoadingresend.value = false;
     }
@@ -403,17 +394,18 @@ class Authcontroller extends GetxController {
       registeredEmail = email;
       final success = await _authProvider.resetPassword(registeredEmail);
       if (success) {
-        Get.snackbar('OTP Sent', 'otp_sent_reset'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-            titleText: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-            messageText: Text('otp_sent_reset'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+        toastification.show(title: Text('OTP Sent', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            description: Text('otp_sent_reset'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+            style: ToastificationStyle.fillColored, type: ToastificationType.info, autoCloseDuration: const Duration(seconds: 3));
         Get.off(Otpverifications(email: email, fromPage: "forgot_password"), transition: Transition.rightToLeftWithFade);
       } else {
         throw 'reset_request_failed'.tr;
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+      final msg = cleanErrorMessage(e);
+      toastification.show(title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
     } finally {
       isLoadingpass.value = false;
     }
@@ -427,17 +419,18 @@ class Authcontroller extends GetxController {
       isLoadingnewpass.value = true;
       final success = await _authProvider.setNewPassword(registeredEmail, passwordController.text.trim());
       if (success) {
-        Get.snackbar('Success', 'password_reset_done'.tr, backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-            titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-            messageText: Text('password_reset_done'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+        toastification.show(title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+            description: Text('password_reset_done'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+            style: ToastificationStyle.fillColored, type: ToastificationType.success, autoCloseDuration: const Duration(seconds: 3));
         Get.offAll(Verifiedpage(page: "forgot_password"), transition: Transition.rightToLeft);
       } else {
         throw 'Password reset failed';
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString(), backgroundColor: AppColor.customDodgerBlue, snackPosition: SnackPosition.TOP,
-          titleText: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-          messageText: Text(e.toString(), style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)));
+      final msg = cleanErrorMessage(e);
+      toastification.show(title: Text('Error', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+          description: Text(msg, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+          style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
     } finally {
       isLoadingnewpass.value = false;
     }

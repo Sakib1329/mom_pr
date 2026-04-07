@@ -11,11 +11,24 @@ import '../../../widgets/custom_button.dart';
 import '../controllers/bottomsheetController.dart';
 import '../controllers/settingcontroller.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   final Settingcontroller controller = Get.find();
   final BottomSheetController bs = Get.find();
-
-  ProfilePage({super.key});
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchProfileData();
+    });
+  }
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -199,6 +212,11 @@ class ProfilePage extends StatelessWidget {
         centerTitle: true,
       ),
       body: Obx(() {
+        if (controller.isFetchingProfile.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColor.vividAmber),
+          );
+        }
         return SingleChildScrollView(
           padding: EdgeInsets.all(20.w),
           child: Column(

@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 
 import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../home/widgets/notification_card.dart';
+import '../../../utils/display_error_widget.dart';
 import '../../home/models/movie_model.dart';
 
 import '../../home/models/series_model.dart';
@@ -30,12 +32,7 @@ class WatchHistory extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (homeController.watchjistoryErrorMessage.isNotEmpty) {
-          return Center(
-            child: Text(
-              homeController.watchjistoryErrorMessage.value,
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
-            ),
-          );
+          return DisplayErrorWidget(errorMessage: homeController.watchjistoryErrorMessage.value);
         }
         if (homeController.watchjistoryitems.isEmpty) {
           return Center(

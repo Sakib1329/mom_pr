@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 
 import 'package:Nuweli/app/res/fonts/fonts.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../home/widgets/notification_card.dart';
+import '../../../utils/display_error_widget.dart';
 import '../../home/models/movie_model.dart';
 
 import '../../home/models/series_model.dart';
@@ -25,7 +27,7 @@ class Mylist extends StatelessWidget {
       ),
       body: Obx(() {
         if (homeController.isWatchLaterLoading.value) return const Center(child: CircularProgressIndicator(color: AppColor.vividAmber,));
-        if (homeController.watchLaterErrorMessage.isNotEmpty) return Center(child: Text(homeController.watchLaterErrorMessage.value, style: TextStyle(color: Colors.white, fontSize: 16.sp)));
+        if (homeController.watchLaterErrorMessage.isNotEmpty) return DisplayErrorWidget(errorMessage: homeController.watchLaterErrorMessage.value);
         if (homeController.watchLaterItems.isEmpty) return Center(child: Text('no_items_watch_later'.tr, style: TextStyle(color: Colors.white, fontSize: 16.sp)));
         return SingleChildScrollView(
           child: Padding(

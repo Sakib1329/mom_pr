@@ -6,12 +6,14 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../res/colors/color.dart';
+import 'package:toastification/toastification.dart';
 
 class SimpleWebViewPage extends StatefulWidget {
   final String url;
   final String buttonTitle;
+  final bool showAppBar;
 
-  const SimpleWebViewPage({super.key, required this.url, required this.buttonTitle});
+  const SimpleWebViewPage({super.key, required this.url, required this.buttonTitle, this.showAppBar = true});
 
   @override
   State<SimpleWebViewPage> createState() => _SimpleWebViewPageState();
@@ -103,13 +105,11 @@ class _SimpleWebViewPageState extends State<SimpleWebViewPage> {
     setState(() => _showWebView = false); // Hide WebView
 
     // Show snackbar
-    Get.snackbar(
-      'Success',
-      'Payment Successful!',
-      backgroundColor: AppColor.vividAmber,
-      colorText: AppColor.black,
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 5),
+    toastification.show(
+      title: const Text('Success'),
+      description: const Text('Payment Successful!'),
+      style: ToastificationStyle.fillColored, type: ToastificationType.success,
+      autoCloseDuration: const Duration(seconds: 5),
     );
 
     // Delay navigation to ensure snackbar is visible
@@ -142,13 +142,11 @@ class _SimpleWebViewPageState extends State<SimpleWebViewPage> {
     _hasHandledSuccess = true;
     _controller.loadRequest(Uri.parse('about:blank')); // Interrupt current page
     setState(() => _showWebView = false); // Hide WebView
-    Get.snackbar(
-      'Error',
-      'Payment Cancelled or Failed',
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    toastification.show(
+      title: const Text('Error'),
+      description: const Text('Payment Cancelled or Failed'),
+      style: ToastificationStyle.fillColored, type: ToastificationType.error,
+      autoCloseDuration: const Duration(seconds: 2),
     );
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) Navigator.of(context).pop();
@@ -161,11 +159,11 @@ class _SimpleWebViewPageState extends State<SimpleWebViewPage> {
     _hasHandledSuccess = true;
     _controller.loadRequest(Uri.parse('about:blank')); // Interrupt current page
     setState(() => _showWebView = false); // Hide WebView
-    Get.snackbar(
-      'Timeout',
-      'Payment process timed out',
-      backgroundColor: Colors.orange,
-      colorText: Colors.white,
+    toastification.show(
+      title: const Text('Timeout'),
+      description: const Text('Payment process timed out'),
+      style: ToastificationStyle.fillColored, type: ToastificationType.warning,
+      autoCloseDuration: const Duration(seconds: 3),
     );
     Navigator.of(context).pop();
   }
@@ -181,14 +179,16 @@ class _SimpleWebViewPageState extends State<SimpleWebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColor.black,
-        leading: BackButton(color: AppColor.white),
-        title: Text(
-          widget.buttonTitle,
-          style: TextStyle(color: Colors.white, fontSize: 18.sp),
-        ),
-      ),
+      appBar: widget.showAppBar
+          ? AppBar(
+              backgroundColor: AppColor.black,
+              leading: BackButton(color: AppColor.white),
+              title: Text(
+                widget.buttonTitle,
+                style: TextStyle(color: Colors.white, fontSize: 18.sp),
+              ),
+            )
+          : null,
       body: Stack(
         children: [
           if (_showWebView) // Conditionally show WebView

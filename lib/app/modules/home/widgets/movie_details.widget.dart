@@ -13,7 +13,10 @@ import '../models/movie_model.dart';
 import '../views/videoscreen.dart';
 import '../../settings/controllers/settingcontroller.dart';
 import '../controllers/home_controller.dart';
+import 'package:toastification/toastification.dart';
+import 'package:get_storage/get_storage.dart';
 import '../services/home_service.dart';
+import '../../../utils/error_helper.dart';
 
 // Event Listener for specific mediaId
 class _DownloadEventListener implements EventListener {
@@ -153,18 +156,18 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
               code == 5;
 
           if (_isDownloaded) {
-            Get.snackbar(
-              'download'.tr,
-              'download_completed'.tr,
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
+            toastification.show(
+              title: Text('download'.tr),
+              description: Text('download_completed'.tr),
+              style: ToastificationStyle.fillColored, type: ToastificationType.success,
+              autoCloseDuration: const Duration(seconds: 3),
             );
           } else if (code == VdoDownloadManager.STATUS_FAILED) {
-            Get.snackbar(
-              'download_error'.tr,
-              'download_failed'.tr,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
+            toastification.show(
+              title: Text('download_error'.tr),
+              description: Text('download_failed'.tr),
+              style: ToastificationStyle.fillColored, type: ToastificationType.error,
+              autoCloseDuration: const Duration(seconds: 3),
             );
           }
         });
@@ -211,8 +214,10 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
           _trailerInitialized = false;
         });
         print(e.toString());
-        Get.snackbar('trailer_error'.tr, e.toString(),
-            backgroundColor: Colors.red, colorText: Colors.white);
+        final msg = cleanErrorMessage(e);
+        if (msg != 'offline') {
+          toastification.show(title: Text('trailer_error'.tr), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+        }
       }
     }
   }
@@ -239,21 +244,21 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
   Future<void> _startDownload() async {
     // Strong protection against multiple clicks / already downloaded
     if (_isDownloaded) {
-      Get.snackbar(
-        'Info',
-        'This movie is already downloaded',
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
+      toastification.show(
+        title: const Text('Info'),
+        description: const Text('This movie is already downloaded'),
+        style: ToastificationStyle.fillColored, type: ToastificationType.info,
+        autoCloseDuration: const Duration(seconds: 3),
       );
       return;
     }
 
     if (_isDownloading) {
-      Get.snackbar(
-        'Info',
-        'Download is already in progress',
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
+      toastification.show(
+        title: const Text('Info'),
+        description: const Text('Download is already in progress'),
+        style: ToastificationStyle.fillColored, type: ToastificationType.info,
+        autoCloseDuration: const Duration(seconds: 3),
       );
       return;
     }
@@ -279,11 +284,11 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
           if (downloadOptions.allVideo.isEmpty || downloadOptions.allAudio.isEmpty) {
             if (mounted) {
               setState(() => _isDownloading = false);
-              Get.snackbar(
-                'download_error'.tr,
-                'This video cannot be downloaded offline (missing video or audio track).',
-                backgroundColor: Colors.red,
-                colorText: Colors.white,
+              toastification.show(
+                title: Text('download_error'.tr),
+                description: const Text('This video cannot be downloaded offline (missing video or audio track).'),
+                style: ToastificationStyle.fillColored, type: ToastificationType.error,
+                autoCloseDuration: const Duration(seconds: 3),
               );
             }
             return;
@@ -296,23 +301,29 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
           final request = DownloadRequest(selections);
 
           VdoDownloadManager.getInstance().enqueue(request);
+          
+          // Save download date for 15-day expiry
+          final storage = GetStorage();
+          Map<String, dynamic> expiryDates = storage.read('download_expiry_dates') ?? {};
+          expiryDates[widget.movie.fileUuid] = DateTime.now().toIso8601String();
+          storage.write('download_expiry_dates', expiryDates);
 
-          Get.snackbar(
-            'download'.tr,
-            'download_started'.tr,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
+          toastification.show(
+            title: Text('download'.tr),
+            description: Text('download_started'.tr),
+            style: ToastificationStyle.fillColored, type: ToastificationType.info,
+            autoCloseDuration: const Duration(seconds: 3),
           );
         },
             (vdoError) {
           if (mounted) {
             setState(() => _isDownloading = false);
             print(vdoError.message);
-            Get.snackbar(
-              'download_error'.tr,
-              vdoError.message ?? 'Unknown error',
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
+            toastification.show(
+              title: Text('download_error'.tr),
+              description: Text(vdoError.message ?? 'Unknown error'),
+              style: ToastificationStyle.fillColored, type: ToastificationType.error,
+              autoCloseDuration: const Duration(seconds: 3),
             );
           }
         },
@@ -320,12 +331,15 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
     } catch (e) {
       if (mounted) {
         setState(() => _isDownloading = false);
-        Get.snackbar(
-          'download_error'.tr,
-          'Failed to get download credentials',
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        final msg = cleanErrorMessage(e);
+        if (msg != 'offline') {
+          toastification.show(
+            title: Text('download_error'.tr),
+            description: Text(msg),
+            style: ToastificationStyle.fillColored, type: ToastificationType.error,
+            autoCloseDuration: const Duration(seconds: 3),
+          );
+        }
       }
     }
   }
@@ -360,20 +374,17 @@ class _MovieDetailsWidgetState extends State<MovieDetailsWidget> {
 
   void _handlePlay(BuildContext context, Settingcontroller settingController) {
     if (widget.movie.isComingSoon) {
-      Get.snackbar(
-        'coming_soon'.tr,
-        '${'available_on'.tr}${widget.movie.formattedComingSoonDate}',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 4),
+      toastification.show(
+        title: Text('coming_soon'.tr),
+        description: Text('${'available_on'.tr}${widget.movie.formattedComingSoonDate}'),
+        style: ToastificationStyle.fillColored, type: ToastificationType.warning,
+        autoCloseDuration: const Duration(seconds: 4),
       );
       return;
     }
 
     if (widget.movie.fileUuid.isEmpty) {
-      Get.snackbar('not_available'.tr, 'cannot_play_yet'.tr,
-          backgroundColor: Colors.red, colorText: Colors.white);
+      toastification.show(title: Text('not_available'.tr), description: Text('cannot_play_yet'.tr), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
       return;
     }
 

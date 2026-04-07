@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:vdocipher_flutter/vdocipher_flutter.dart';
 import '../services/home_service.dart';
 import '../../../res/colors/color.dart';
+import '../../../utils/error_helper.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String fileUuid;
@@ -65,7 +66,7 @@ print(savedSeconds);
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = isOfflineError(e) ? '🌐 No internet connection' : cleanErrorMessage(e);
         _isLoading = false;
       });
     }

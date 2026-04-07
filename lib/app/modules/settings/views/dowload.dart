@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/Get.dart';
 import 'package:vdocipher_flutter/vdocipher_flutter.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../../res/colors/color.dart';
+import 'package:toastification/toastification.dart';
 import 'offlineplayer.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class DownloadsScreen extends StatefulWidget {
 class _DownloadsScreenState extends State<DownloadsScreen>
     implements EventListener {
   List<DownloadStatus> downloadedVideos = [];
+  bool _isLoading = true;
   final VdoDownloadManager _downloadManager = VdoDownloadManager.getInstance();
 
   @override
@@ -89,15 +92,44 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   Future<void> _loadDownloads() async {
     try {
       final List<DownloadStatus> all = await _downloadManager.query(Query());
+      final storage = GetStorage();
+      Map<String, dynamic> expiryDates = storage.read('download_expiry_dates') ?? {};
+      bool statusChanged = false;
 
       // Debug: See all downloads
       for (var status in all) {
+        final mediaId = status.mediaInfo.mediaId;
+        final title = status.mediaInfo.title ?? 'No title';
+        
+        // Auto-delete if > 15 days
+        if (expiryDates.containsKey(mediaId)) {
+          final downloadDate = DateTime.parse(expiryDates[mediaId]);
+          final difference = DateTime.now().difference(downloadDate).inDays;
+          
+          if (difference >= 15) {
+            debugPrint('Auto-deleting expired download: $title ($mediaId) - $difference days old');
+            _downloadManager.remove(mediaId);
+            expiryDates.remove(mediaId);
+            statusChanged = true;
+            continue;
+          }
+        } else if (status.status == VdoDownloadManager.STATUS_COMPLETED || status.status == 5) {
+          // If for some reason date is missing but completed, set it now to avoid infinite retention
+          expiryDates[mediaId] = DateTime.now().toIso8601String();
+          statusChanged = true;
+        }
+
         debugPrint(
-            'Download: ${status.mediaInfo?.title ?? 'No title'} | '
-                'mediaId: ${status.mediaInfo?.mediaId} | '
+            'Download: $title | '
+                'mediaId: $mediaId | '
                 'status: ${status.status}');
       }
 
+      if (statusChanged) {
+        storage.write('download_expiry_dates', expiryDates);
+        // Re-query if we deleted anything
+        return _loadDownloads();
+      }
 
       final completed = all.where((status) {
         return status.status == VdoDownloadManager.STATUS_COMPLETED || status.status == 5;
@@ -106,6 +138,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       if (mounted) {
         setState(() {
           downloadedVideos = completed;
+          _isLoading = false;
         });
       }
 
@@ -117,12 +150,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   void _deleteDownload(String mediaId) {
     _downloadManager.remove(mediaId);
-    Get.snackbar(
-      'deleted'.tr,
-      'video_removed_from_downloads'.tr,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+    toastification.show(
+      title: Text('deleted'.tr),
+      description: Text('video_removed_from_downloads'.tr),
+      style: ToastificationStyle.fillColored, type: ToastificationType.error,
+      autoCloseDuration: const Duration(seconds: 3),
     );
     _loadDownloads();
   }
@@ -147,7 +179,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         onRefresh: _loadDownloads,
         color: AppColor.vividAmber,
         backgroundColor: AppColor.greyDark,
-        child: downloadedVideos.isEmpty
+        child: _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColor.vividAmber),
+              )
+            : downloadedVideos.isEmpty
             ? Center(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),

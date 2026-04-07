@@ -48,8 +48,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(
-        () => Stack(
+      body: Stack(
           children: [
             NestedScrollView(
               headerSliverBuilder: (context, innerBoxScrolled) {
@@ -346,7 +345,94 @@ class HomePage extends StatelessWidget {
                   ),
                 ];
               },
-              body: _pages[controller.currentIndex.value],
+              body: RefreshIndicator(
+                onRefresh: () => controller.refreshHome(),
+                color: AppColor.vividAmber,
+                backgroundColor: AppColor.charcoal,
+                child: Obx(() {
+                  if (controller.isOffline.value) {
+                    return _buildErrorState(
+                      emoji: '🌐',
+                      title: 'connection_unavailable'.tr,
+                      subtitle: 'check_your_internet'.tr,
+                    );
+                  }
+                  if (controller.isServerDown.value) {
+                    return _buildErrorState(
+                      emoji: '🚧',
+                      title: 'server_under_maintenance'.tr,
+                      subtitle: 'we_will_be_back_soon'.tr,
+                      code: controller.lastErrorCode.value,
+                    );
+                  }
+                  return _pages[controller.currentIndex.value];
+                }),
+              ),
+            ),
+          ],
+        ),
+    );
+  }
+
+  Widget _buildErrorState({required String emoji, required String title, required String subtitle, int? code}) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Container(
+        height: 500.h,
+        padding: EdgeInsets.symmetric(horizontal: 40.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(emoji, style: TextStyle(fontSize: 80.sp)),
+            SizedBox(height: 20.h),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.montserratBold.copyWith(
+                color: AppColor.white,
+                fontSize: 20.sp,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.montserratMedium.copyWith(
+                color: AppColor.customGray,
+                fontSize: 14.sp,
+              ),
+            ),
+            if (code != null) ...[
+              SizedBox(height: 20.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColor.charcoal,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: AppColor.customGray.withOpacity(0.3)),
+                ),
+                child: Text(
+                  'HTTP $code',
+                  style: TextStyle(
+                    color: AppColor.customGray,
+                    fontSize: 12.sp,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+            SizedBox(height: 30.h),
+            ElevatedButton(
+              onPressed: () => controller.refreshHome(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.vividAmber,
+                padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              ),
+              child: Text(
+                'try_again'.tr,
+                style: AppTextStyles.montserratBold.copyWith(color: AppColor.black),
+              ),
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:get/Get.dart';
 import '../../../res/colors/color.dart';
 import '../../../res/fonts/fonts.dart';
 import '../models/comingsoon_model.dart';
+import 'package:toastification/toastification.dart';
 import '../services/comingsoon_service.dart';
 
 class ComingSoonController extends GetxController {
@@ -35,22 +36,18 @@ class ComingSoonController extends GetxController {
     await fetchItems();
 
     if (success) {
-      Get.snackbar(
-        'Success',
-        'reminder_added'.tr,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: AppColor.vividAmber,
-        titleText: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-        messageText: Text('reminder_added'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+      toastification.show(
+        title: Text('Success', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        description: Text('reminder_added'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        style: ToastificationStyle.fillColored, type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 3),
       );
     } else {
-      Get.snackbar(
-        'Failed',
-        'reminder_failed'.tr,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: AppColor.vividAmber,
-        titleText: Text('Failed', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
-        messageText: Text('reminder_failed'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+      toastification.show(
+        title: Text('Failed', style: AppTextStyles.montserratBold.copyWith(color: AppColor.background)),
+        description: Text('reminder_failed'.tr, style: AppTextStyles.montserratRegular.copyWith(color: AppColor.background)),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
       );
     }
   }

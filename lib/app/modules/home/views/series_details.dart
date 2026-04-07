@@ -5,6 +5,7 @@ import 'package:get/Get.dart';
 import 'package:Nuweli/app/modules/home/widgets/series_details.dart';
 import '../../../res/colors/color.dart';
 import '../../home/controllers/home_controller.dart';
+import '../../../utils/display_error_widget.dart';
 
 class SeriesDetailsPage extends StatelessWidget {
   @override
@@ -21,12 +22,7 @@ class SeriesDetailsPage extends StatelessWidget {
       if (homeController.SeriesdetailsErrorMessage.isNotEmpty) {
         return Scaffold(
           backgroundColor: AppColor.black,
-          body: Center(
-            child: Text(
-              homeController.SeriesdetailsErrorMessage.value,
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
-            ),
-          ),
+          body: DisplayErrorWidget(errorMessage: homeController.SeriesdetailsErrorMessage.value),
         );
       }
       if (homeController.SeriesDetails.value == null) {

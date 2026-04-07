@@ -8,12 +8,13 @@ import 'package:Nuweli/app/modules/settings/controllers/settingcontroller.dart';
 import 'package:Nuweli/app/modules/settings/controllers/bottomsheetController.dart';
 
 import '../services/push_notification.dart';
+import '../services/network_controller.dart';
 import '../modules/home/controllers/comingsoon_controller.dart';
 
 class InitialBinding extends Bindings {
   @override
   void dependencies() {
-
+    Get.put(NetworkController(), permanent: true);
     Get.put(HomeService(), permanent: true);
     Get.put(Authcontroller(), permanent: true);
     Get.put(NavController(), permanent: true);

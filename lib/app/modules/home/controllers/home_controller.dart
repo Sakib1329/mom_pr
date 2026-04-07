@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/Get.dart';
+import 'package:toastification/toastification.dart';
 import 'package:Nuweli/app/modules/home/models/allcontent_model.dart';
 import 'package:Nuweli/app/modules/home/views/details.dart';
 import 'package:Nuweli/app/modules/home/views/series_details.dart';
@@ -13,6 +14,7 @@ import '../models/series_model.dart';
 import '../models/seriesresponse_model.dart';
 import '../services/home_service.dart';
 import 'navcontroller.dart';
+import '../../../utils/error_helper.dart';
 
 class HomeController extends GetxController {
   final HomeService _homeService = Get.find<HomeService>();
@@ -21,6 +23,11 @@ class HomeController extends GetxController {
   var currentIndex = 0.obs;
 
   var selectedSeasonIndex = 0.obs;
+
+  // New Error States
+  var isOffline = false.obs;
+  var isServerDown = false.obs;
+  var lastErrorCode = 0.obs;
 
   // Search
   var items = <dynamic>[].obs;
@@ -143,7 +150,7 @@ class HomeController extends GetxController {
       final searchResponse = await _homeService.searchAll(title: title);
       items.assignAll([...searchResponse.movies, ...searchResponse.series]);
     } catch (e) {
-      errorMessage('Failed to load search data: $e');
+      errorMessage(cleanErrorMessage(e));
     } finally {
       isLoading(false);
     }
@@ -170,7 +177,7 @@ class HomeController extends GetxController {
       movieDetails.value = details;
 
     } catch (e) {
-      detailsErrorMessage('Failed to load movie details: $e');
+      detailsErrorMessage(cleanErrorMessage(e));
     } finally {
       isDetailsLoading(false);
     }
@@ -185,7 +192,7 @@ class HomeController extends GetxController {
       selectedSeasonIndex.value = 0;
       Get.to(() => SeriesDetailsPage(), transition: Transition.rightToLeftWithFade);
     } catch (e) {
-      SeriesdetailsErrorMessage('Failed to load series details: $e');
+      SeriesdetailsErrorMessage(cleanErrorMessage(e));
     } finally {
       isSeriesDetailsLoading(false);
     }
@@ -200,7 +207,7 @@ class HomeController extends GetxController {
       final series = searchResponse.series;
       watchjistoryitems.assignAll([...movies, ...series]);
     } catch (e) {
-      watchjistoryErrorMessage('Failed to load watch history data: $e');
+      watchjistoryErrorMessage(cleanErrorMessage(e));
     } finally {
       isWatchhistoryLoading(false);
     }
@@ -215,7 +222,7 @@ class HomeController extends GetxController {
       final series = searchResponse.series;
       collectionitems.assignAll([...movies, ...series]);
     } catch (e) {
-      collectionErrorMessage('Failed to load collections data: $e');
+      collectionErrorMessage(cleanErrorMessage(e));
     } finally {
       iscollectionLoading(false);
     }
@@ -227,27 +234,19 @@ class HomeController extends GetxController {
       watchLaterErrorMessage('');
       await _homeService.addToWatchLater(id, aliasType);
       await fetchWatchLaterData();
-      Get.snackbar(
-        'added_to_watch_later'.tr,
-        'added_to_watch_later_msg'.tr,
-        backgroundColor: AppColor.vividAmber,
-        colorText: Colors.black,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      toastification.show(
+        title: Text('added_to_watch_later'.tr),
+        description: Text('added_to_watch_later_msg'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } catch (e) {
-      watchLaterErrorMessage('Failed to add to watch later: $e');
-      Get.snackbar(
-        'Error',
-        'failed_add_watch_later'.tr,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      watchLaterErrorMessage(cleanErrorMessage(e));
+      toastification.show(
+        title: const Text('Error'),
+        description: Text('failed_add_watch_later'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } finally {
       isWatchLaterLoading(false);
@@ -260,27 +259,19 @@ class HomeController extends GetxController {
       watchLaterErrorMessage('');
       await _homeService.removeFromWatchLater(id, aliasType);
       await fetchWatchLaterData();
-      Get.snackbar(
-        'removed_from_watch_later'.tr,
-        'removed_from_watch_later_msg'.tr,
-        backgroundColor: AppColor.vividAmber,
-        colorText: Colors.black,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      toastification.show(
+        title: Text('removed_from_watch_later'.tr),
+        description: Text('removed_from_watch_later_msg'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } catch (e) {
-      watchLaterErrorMessage('Failed to remove from watch later: $e');
-      Get.snackbar(
-        'Error',
-        'failed_remove_watch_later'.tr,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      watchLaterErrorMessage(cleanErrorMessage(e));
+      toastification.show(
+        title: const Text('Error'),
+        description: Text('failed_remove_watch_later'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } finally {
       isWatchLaterLoading(false);
@@ -293,27 +284,19 @@ class HomeController extends GetxController {
       watchjistoryErrorMessage('');
       await _homeService.removeFromWatchhistory(id, aliasType);
       await fetchWatchhistoryData();
-      Get.snackbar(
-        'removed_from_watch_history'.tr,
-        'removed_from_watch_history_msg'.tr,
-        backgroundColor: AppColor.vividAmber,
-        colorText: Colors.black,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      toastification.show(
+        title: Text('removed_from_watch_history'.tr),
+        description: Text('removed_from_watch_history_msg'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } catch (e) {
-      watchjistoryErrorMessage('Failed to remove from watch history: $e');
-      Get.snackbar(
-        'Error',
-        'failed_remove_watch_history'.tr,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: EdgeInsets.all(16.w),
-        borderRadius: 8.r,
-        duration: const Duration(seconds: 2),
+      watchjistoryErrorMessage(cleanErrorMessage(e));
+      toastification.show(
+        title: const Text('Error'),
+        description: Text('failed_remove_watch_history'.tr),
+        style: ToastificationStyle.fillColored, type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 2),
       );
     } finally {
       isWatchhistoryLoading(false);
@@ -329,7 +312,7 @@ class HomeController extends GetxController {
       final series = searchResponse.series;
       watchLaterItems.assignAll([...movies, ...series]);
     } catch (e) {
-      watchLaterErrorMessage('Failed to load watch later data: $e');
+      watchLaterErrorMessage(cleanErrorMessage(e));
     } finally {
       isWatchLaterLoading(false);
     }
@@ -340,7 +323,10 @@ class HomeController extends GetxController {
       await _homeService.likeItem(id, aliasType);
       await fetchMovieDetails(id, aliasType);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update like: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(title: const Text('Error'), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+      }
     }
   }
 
@@ -349,7 +335,10 @@ class HomeController extends GetxController {
       await _homeService.dislikeContent(id, aliasType);
       await fetchMovieDetails(id, aliasType);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update dislike: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(title: const Text('Error'), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+      }
     }
   }
 
@@ -358,7 +347,10 @@ class HomeController extends GetxController {
       await _homeService.likeItem(id, aliasType);
       await fetchSeriesDetails(id, aliasType);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update like: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(title: const Text('Error'), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+      }
     }
   }
 
@@ -367,7 +359,10 @@ class HomeController extends GetxController {
       await _homeService.dislikeContent(id, aliasType);
       await fetchSeriesDetails(id, aliasType);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update dislike: $e', backgroundColor: Colors.red, colorText: Colors.white);
+      final msg = cleanErrorMessage(e);
+      if (msg != 'offline') {
+        toastification.show(title: const Text('Error'), description: Text(msg), style: ToastificationStyle.fillColored, type: ToastificationType.error, autoCloseDuration: const Duration(seconds: 3));
+      }
     }
   }
 
@@ -379,7 +374,7 @@ class HomeController extends GetxController {
       final capitalizedGenres = genres.map((genre) => genre.capitalizeFirst!).toList();
       genre.assignAll(capitalizedGenres);
     } catch (e) {
-      genresErrorMessage('Failed to load genres: $e');
+      genresErrorMessage(cleanErrorMessage(e));
     } finally {
       isGenresLoading(false);
     }
@@ -389,25 +384,99 @@ class HomeController extends GetxController {
     try {
       isAllMoviesLoading(true);
       allMoviesErrorMessage('');
+      _resetErrorStates();
       final response = await _homeService.getAllMovies();
       allMoviesResponse.value = response;
       _updateMovieTypes(response);
     } catch (e) {
-      allMoviesErrorMessage('Failed to load all movies: $e');
+      _handleError(e, allMoviesErrorMessage);
     } finally {
       isAllMoviesLoading(false);
     }
+  }
+
+  Future<void> fetchAllContent() async {
+    try {
+      isAllContentLoading.value = true;
+      allContentErrorMessage.value = '';
+      _resetErrorStates();
+
+      final response = await _homeService.getAllContent();
+      allContentResponse.value = response;
+
+      popularItems.assignAll(_alternateMoviesAndSeries(response.movies.popular, response.series.popular));
+      
+      bannerMovies.assignAll({
+        for (var item in popularItems)
+          if (item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty)
+            item.postersUrl.first: (item is Movie)
+                ? item.genres.map((g) => g.name).toList()
+                : (item is Series)
+                    ? item.genres.map((g) => g.name).toList()
+                    : <String>[],
+      });
+
+    } catch (e) {
+      _handleError(e, allContentErrorMessage);
+    } finally {
+      isAllContentLoading.value = false;
+    }
+  }
+
+  void _resetErrorStates() {
+    isOffline.value = false;
+    isServerDown.value = false;
+    lastErrorCode.value = 0;
+  }
+
+  /// Extracts a clean error label from an exception.
+  /// Returns "offline", "server_down", or "HTTP XXX" / "Error".
+  static String _cleanError(Object e) {
+    final s = e.toString();
+    // Check for offline
+    if (s.contains('SocketException') || s.contains('failed to connect') || s.contains('No internet') || s.contains('Network is unreachable')) {
+      return 'offline';
+    }
+    // Extract HTTP status codes
+    final codeMatch = RegExp(r'\b([3-5]\d{2})\b').firstMatch(s);
+    if (codeMatch != null) return 'HTTP ${codeMatch.group(1)}';
+    return 'Error';
+  }
+
+  void _handleError(Object e, RxString errorObservable) {
+    final s = e.toString();
+    if (s.contains('502')) {
+      isServerDown.value = true;
+      lastErrorCode.value = 502;
+    } else if (s.contains('SocketException') || s.contains('failed to connect') || s.contains('No internet')) {
+      isOffline.value = true;
+    }
+    errorObservable.value = _cleanError(e);
+    debugPrint("API Error handled: $e");
+  }
+
+  Future<void> refreshHome() async {
+    isOffline.value = false;
+    isServerDown.value = false;
+    await Future.wait([
+      fetchAllContent(),
+      fetchAllMovies(),
+      fetchAllSeries(),
+      fetchGenres(),
+      loadContinueWatching(),
+    ]);
   }
 
   Future<void> fetchMoviesByGenre(String genreSlug) async {
     try {
       isAllMoviesLoading(true);
       allMoviesErrorMessage('');
+      _resetErrorStates();
       final response = await _homeService.getMoviesByGenre(genreSlug);
       allMoviesResponse.value = response;
       _updateMovieTypes(response);
     } catch (e) {
-      allMoviesErrorMessage('Failed to load movies by genre: $e');
+      _handleError(e, allMoviesErrorMessage);
     } finally {
       isAllMoviesLoading(false);
     }
@@ -437,7 +506,7 @@ class HomeController extends GetxController {
       allSeriesResponse.value = response;
       _updateSeriesTypes(response);
     } catch (e) {
-      allSeriesErrorMessage('Failed to load all series: $e');
+      allSeriesErrorMessage(cleanErrorMessage(e));
     } finally {
       isAllSeriesLoading(false);
     }
@@ -451,7 +520,7 @@ class HomeController extends GetxController {
       allSeriesResponse.value = response;
       _updateSeriesTypes(response);
     } catch (e) {
-      allSeriesErrorMessage('Failed to load series by genre: $e');
+      allSeriesErrorMessage(cleanErrorMessage(e));
     } finally {
       isAllSeriesLoading(false);
     }
@@ -473,26 +542,7 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> fetchAllContent() async {
-    try {
-      isAllContentLoading(true);
-      allContentErrorMessage('');
-      final response = await _homeService.getAllContent();
-      allContentResponse.value = response;
-      popularItems.assignAll(_alternateMoviesAndSeries(response.movies.popular, response.series.popular));
-      bannerMovies.assignAll({
-        for (var item in popularItems)
-          if (item.postersUrl.isNotEmpty && item.postersUrl.first.isNotEmpty)
-            item.postersUrl.first: (item is Movie || item is Series)
-                ? item.genres.map((g) => g.name).toList().cast<String>()
-                : <String>[],
-      });
-    } catch (e) {
-      allContentErrorMessage('Failed to load all content: $e');
-    } finally {
-      isAllContentLoading(false);
-    }
-  }
+
 
   List<dynamic> _alternateMoviesAndSeries(List<dynamic> movies, List<dynamic> series) {
     final mixed = <dynamic>[];

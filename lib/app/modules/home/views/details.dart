@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../res/colors/color.dart';
 import '../../home/controllers/home_controller.dart';
 import '../widgets/movie_details.widget.dart';
+import '../../../utils/display_error_widget.dart';
 
 class MovieDetailsPage extends StatelessWidget {
   @override
@@ -21,12 +22,7 @@ class MovieDetailsPage extends StatelessWidget {
       if (homeController.detailsErrorMessage.isNotEmpty) {
         return Scaffold(
           backgroundColor: AppColor.black,
-          body: Center(
-            child: Text(
-              homeController.detailsErrorMessage.value,
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
-            ),
-          ),
+          body: DisplayErrorWidget(errorMessage: homeController.detailsErrorMessage.value),
         );
       }
       if (homeController.movieDetails.value == null) {

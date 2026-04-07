@@ -5,6 +5,9 @@ import 'package:get/get.dart';
 import 'package:Nuweli/app/res/assets/imageassets.dart';
 import '../../../res/fonts/fonts.dart';
 import '../../home/controllers/home_controller.dart';
+import '../widgets/notification_card.dart';
+import '../widgets/moviecard_widget.dart';
+import '../../../utils/display_error_widget.dart';
 import '../../home/models/movie_model.dart';
 import '../../home/models/series_model.dart';
 
@@ -29,12 +32,7 @@ class Collections extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (homeController.collectionErrorMessage.isNotEmpty) {
-          return Center(
-            child: Text(
-              homeController.collectionErrorMessage.value,
-              style: TextStyle(color: Colors.white, fontSize: 16.sp),
-            ),
-          );
+          return DisplayErrorWidget(errorMessage: homeController.collectionErrorMessage.value);
         }
         if (homeController.collectionitems.isEmpty) {
           return Center(
